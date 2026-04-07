@@ -38,3 +38,8 @@ C:*
 # Test artifacts
 .test_venv/
 jobs/
+# Android build files
+android_shell/build/
+android_shell/app/build/
+android_shell/.gradle/
+android_shell/local.properties

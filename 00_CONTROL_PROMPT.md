@@ -56,7 +56,7 @@ Build a polished Android shell that:
 
 Mark each item complete only when actually done.
 
-- [ ] Phase 1 complete
+- [x] Phase 1 complete
 - [ ] Phase 2 complete
 - [ ] Phase 3 complete
 - [ ] Phase 4 complete
@@ -122,3 +122,46 @@ Append a new section after each completed phase using this exact structure.
 The app should feel intentional, clean, and appliance-like where appropriate. Favor stable structure, clear state handling, and minimal moving parts over cleverness.
 
 The result should look and behave like a real LYRN mobile shell, not a generic wrapped website.
+
+### Phase 1 Build Notes
+**Status:** Complete
+
+**Files Created**
+- android_shell/build.gradle
+- android_shell/settings.gradle
+- android_shell/gradle.properties
+- android_shell/app/build.gradle
+- android_shell/app/src/main/AndroidManifest.xml
+- android_shell/app/src/main/res/layout/activity_main.xml
+- android_shell/app/src/main/res/values/strings.xml
+- android_shell/app/src/main/res/values/themes.xml
+- android_shell/app/src/main/res/values/colors.xml
+- android_shell/app/src/main/java/com/lyrn/shell/MainActivity.kt
+- android_shell/app/src/main/java/com/lyrn/shell/WebViewHost.kt
+
+**Files Modified**
+- 00_CONTROL_PROMPT.md
+- .gitignore
+
+**What Was Built**
+- Set up a clean Android application foundation using Kotlin and Gradle.
+- Configured project with no-action-bar, fullscreen layout.
+- Added a simple `WebViewHost` class to initialize the WebView cleanly.
+- Placed a placeholder to load `http://10.0.2.2:8080/`.
+
+**Important Decisions**
+- Used Kotlin rather than Java for more modern development.
+- Chose programmatic setup of the WebView configuration within a helper class `WebViewHost` rather than doing it all in the `MainActivity` to separate host logic.
+- Avoided setting up UI/activities for future phases so as not to over-engineer at this phase.
+
+**Problems Encountered**
+- Creating the project natively in a directory without existing Android files caused Gradle cache and build outputs, so these were properly excluded in `.gitignore`.
+
+**Deferred / Not Yet Done**
+- Role selection UI and persistence.
+- WebView Config injection (currently it hardcodes the 10.0.2.2 dev localhost URL).
+- Real splash screen or loading states.
+
+**Next Phase Needs To Know**
+- The project is inside the `android_shell` directory. Use that as the root for Android-specific logic.
+- You can extend `MainActivity.kt` and `WebViewHost.kt` for URL updates and config injection.
