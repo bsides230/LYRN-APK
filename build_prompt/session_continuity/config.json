@@ -1,0 +1,6 @@
+{
+  "begin_bracket": "###SESSION_CONTINUITY_START###",
+  "end_bracket": "###SESSION_CONTINUITY_END###",
+  "rwi_text": "Session opening, continuity handling, and memory usage rules.",
+  "content_file": "content.txt"
+}

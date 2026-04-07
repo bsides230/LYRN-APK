@@ -1,0 +1,27 @@
+INFO:     Started server process [3767]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8080 (Press CTRL+C to quit)
+[System] Logging to session: logs/session_20260202_055603
+Settings loaded successfully
+Next job flag initialized to 'false'
+LLM status flag initialized to 'idle'
+Loaded 2 job definitions from jobs.json: ['chat_pair_summary', 'test_job_scripts']
+Settings loaded successfully
+Next job flag initialized to 'false'
+LLM status flag initialized to 'idle'
+Starting server on port 8080...
+[System] Warning: No admin token found (admin_token.txt or LYRN_MODEL_TOKEN). Model management will be unavailable.
+[Info] System: Backend started.
+[Scheduler] Starting scheduler loop...
+INFO:     127.0.0.1:36416 - "GET /modules/Job%20Manager.html HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36416 - "GET /modules/Job%20Manager.html HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:36416 - "GET /api/automation/jobs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36428 - "GET /api/automation/cycles HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36440 - "GET /api/automation/schedule HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36444 - "GET /api/automation/scripts HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36454 - "GET /api/automation/history HTTP/1.1" 200 OK
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [3767]

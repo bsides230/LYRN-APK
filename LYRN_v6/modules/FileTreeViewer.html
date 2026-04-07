@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>File Tree Viewer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+    <style>
+        :root {
+            --bg-core: #050505;
+            --bg-panel: #0a0a0a;
+            --bg-input: #050505;
+            --brand-purple: #7c5cff;
+            --brand-purple-dim: rgba(124, 92, 255, 0.1);
+            --text-head: #ffffff;
+            --text-body: #b0b0b0;
+            --text-dim: #666666;
+            --border-color: #222222;
+            --input-focus-bg: #111111;
+            --font-size-base: 12px;
+        }
+
+        body[data-theme="light"] {
+            --bg-core: #eef0f4;
+            --bg-panel: #ffffff;
+            --bg-input: #ffffff;
+            --brand-purple: #6a4ce0;
+            --brand-purple-dim: rgba(106, 76, 224, 0.1);
+            --text-head: #111111;
+            --text-body: #333333;
+            --text-dim: #555555;
+            --border-color: #d1d5db;
+            --input-focus-bg: #f9fafb;
+        }
+
+        * { box-sizing: border-box; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; border: 2px solid transparent; background-clip: content-box; }
+        ::-webkit-scrollbar-thumb:hover { background-color: var(--brand-purple); }
+
+        body {
+            background-color: var(--bg-core);
+            color: var(--text-body);
+            font-family: 'Inter', sans-serif;
+            margin: 0; padding: 20px;
+            font-size: var(--font-size-base);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+        }
+
+        h2 { font-family: 'JetBrains Mono', monospace; color: var(--text-head); font-size: 16px; margin-top: 0; margin-bottom: 15px; }
+
+        .toolbar {
+            display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; align-items: center;
+        }
+
+        input[type="text"], input[type="number"] {
+            background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-head);
+            padding: 6px 10px; border-radius: 4px; font-family: inherit; font-size: 12px; flex: 1; min-width: 200px;
+        }
+        input:focus { outline: none; border-color: var(--brand-purple); background: var(--input-focus-bg); }
+
+        button {
+            background-color: var(--bg-panel); border: 1px solid var(--border-color); color: var(--text-head);
+            padding: 6px 12px; border-radius: 4px; cursor: pointer; font-family: 'JetBrains Mono', monospace; font-size: 11px;
+            transition: all 0.2s; white-space: nowrap;
+        }
+        button:hover { border-color: var(--brand-purple); }
+        button.primary { background-color: var(--brand-purple); border-color: var(--brand-purple); color: #fff; }
+        button.primary:hover { opacity: 0.9; }
+
+        .layout-container {
+            display: flex; gap: 15px; flex: 1; overflow: hidden;
+        }
+
+        .panel {
+            background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 6px;
+            display: flex; flex-direction: column; overflow: hidden;
+        }
+        .tree-panel { flex: 1; }
+        .preview-panel { flex: 1; display: none; }
+        .preview-panel.active { display: flex; }
+
+        .panel-header {
+            padding: 10px; border-bottom: 1px solid var(--border-color); font-family: 'JetBrains Mono', monospace;
+            font-size: 12px; color: var(--text-head); display: flex; justify-content: space-between; align-items: center;
+            background: rgba(0,0,0,0.2);
+        }
+
+        .panel-content {
+            padding: 10px; overflow-y: auto; flex: 1;
+        }
+
+        /* Tree Styles */
+        ul.tree { list-style-type: none; padding-left: 20px; margin: 0; }
+        ul.tree.root { padding-left: 0; }
+        li.tree-node { margin: 4px 0; }
+        .node-row {
+            display: flex; align-items: center; gap: 8px; padding: 4px; border-radius: 4px;
+        }
+        .node-row:hover { background: rgba(124, 92, 255, 0.05); }
+
+        .node-toggle {
+            cursor: pointer; width: 16px; height: 16px; display: inline-flex; align-items: center; justify-content: center;
+            font-family: monospace; font-size: 14px; user-select: none; color: var(--text-dim);
+        }
+        .node-toggle:hover { color: var(--text-head); }
+        .node-icon { font-size: 14px; }
+        .node-name { flex: 1; font-family: 'JetBrains Mono', monospace; font-size: 12px; cursor: default; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        .node-checkboxes { display: flex; gap: 10px; align-items: center; }
+        .chk-label { display: flex; align-items: center; gap: 4px; font-size: 10px; color: var(--text-dim); cursor: pointer; user-select: none; }
+
+        .node-explanation { font-size: 11px; color: var(--text-dim); font-style: italic; margin-left: 10px; flex: 2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        .rec-btn { background: transparent; border: 1px solid var(--border-color); color: var(--text-dim); padding: 2px 4px; font-size: 9px; cursor: pointer; border-radius: 2px; margin-right: 4px; }
+        .rec-btn:hover { background: var(--brand-purple-dim); color: var(--brand-purple); border-color: var(--brand-purple); }
+
+        .hidden { display: none !important; }
+
+        /* Preview Area */
+        #compile-preview {
+            width: 100%; height: 100%; background: transparent; border: none; color: var(--text-body);
+            font-family: 'JetBrains Mono', monospace; font-size: 11px; resize: none; outline: none;
+        }
+
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(2px);
+            display: none; align-items: center; justify-content: center; z-index: 1000;
+        }
+        .modal {
+            background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px;
+            width: 400px; display: flex; flex-direction: column; gap: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .modal h3 { margin: 0; font-family: 'JetBrains Mono'; font-size: 14px; color: var(--text-head); }
+
+    </style>
+</head>
+<body>
+
+    <h2>File Tree Viewer / Repo Compiler</h2>
+
+    <div class="toolbar">
+        <input type="text" id="inp-root-path" placeholder="Enter absolute local path (e.g. C:/repo or /var/www/html)...">
+        <button onclick="loadTree()">Load Folder</button>
+        <span style="border-left: 1px solid var(--border-color); height: 20px; margin: 0 5px;"></span>
+        <button onclick="togglePreview()">Toggle Preview Panel</button>
+        <button class="primary" onclick="compileTree()">Compile & Preview</button>
+        <button class="primary" id="btn-inject" style="display:none;" onclick="injectContext()">Inject into Context</button>
+        <button class="primary" id="btn-clear-inject" onclick="clearContext()" style="background-color: var(--error-color); border-color: var(--error-color);">Clear Injected Context</button>
+    </div>
+
+    <div class="toolbar" style="margin-bottom: 15px;">
+        <button onclick="selectAll('include')">Select All Included</button>
+        <button onclick="selectAll('expand')">Select All Expanded</button>
+        <button onclick="clearAll('include')">Clear Included</button>
+        <button onclick="clearAll('expand')">Clear Expanded</button>
+        <span style="border-left: 1px solid var(--border-color); height: 20px; margin: 0 5px;"></span>
+        <button onclick="openProfileModal('save')">Save Profile</button>
+        <button onclick="openProfileModal('load')">Load Profile</button>
+    </div>
+
+    <div class="layout-container">
+        <!-- Tree Panel -->
+        <div class="panel tree-panel">
+            <div class="panel-header">
+                <span>File Explorer</span>
+                <span id="tree-stats" style="color:var(--text-dim);"></span>
+            </div>
+            <div class="panel-content" id="tree-container">
+                <div style="color:var(--text-dim); text-align:center; margin-top:20px;">Enter a path and click Load Folder.</div>
+            </div>
+        </div>
+
+        <!-- Preview Panel -->
+        <div class="panel preview-panel" id="preview-panel">
+            <div class="panel-header">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span>Compiled Artifact Preview</span>
+                    <span id="char-count" style="color: var(--brand-purple); font-size: 11px;"></span>
+                </div>
+                <button onclick="copyPreview()">Copy</button>
+            </div>
+            <div class="panel-content" style="padding:0;">
+                <textarea id="compile-preview" readonly placeholder="Compiled artifact will appear here..."></textarea>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal-overlay" id="profile-modal">
+        <div class="modal">
+            <h3 id="modal-title">Save Profile</h3>
+            <input type="text" id="inp-profile-name" placeholder="Profile name (e.g. my_repo)">
+            <select id="sel-profile" style="background:var(--bg-input); border:1px solid var(--border-color); color:var(--text-head); padding:6px; border-radius:4px; display:none;"></select>
+            <div style="display:flex; justify-content:flex-end; gap:10px;">
+                <button onclick="closeProfileModal()">Cancel</button>
+                <button class="primary" id="btn-modal-action">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let coreUrl = "http://localhost:8000";
+        let authToken = null;
+        let treeData = null; // Holds the hierarchical state
+
+        // --- State Management ---
+        // treeState maps relative path to { include: bool, expand: bool }
+        let treeState = {};
+
+        window.addEventListener('message', (e) => {
+            if (e.data.type === 'CORE_URL_CHANGE') coreUrl = e.data.url;
+            if (e.data.type === 'TOKEN_UPDATE') authToken = e.data.token;
+            if (e.data.type === 'THEME_CHANGE') document.body.setAttribute('data-theme', e.data.theme);
+            if (e.data.type === 'FONT_CHANGE') document.documentElement.style.setProperty('--font-size-base', e.data.fontSize + 'px');
+        });
+
+        async function fetchAPI(endpoint, method = 'GET', body = null) {
+            const headers = {};
+            if (authToken) headers['X-Token'] = authToken;
+            if (body) headers['Content-Type'] = 'application/json';
+
+            const url = coreUrl.replace(/\/$/, '') + endpoint;
+            const res = await fetch(url, {
+                method, headers, body: body ? JSON.stringify(body) : null
+            });
+            if (!res.ok) {
+                const err = await res.text();
+                throw new Error(err || `HTTP ${res.status}`);
+            }
+            return await res.json();
+        }
+
+        // --- Tree Loading & Rendering ---
+        async function loadTree(keepState = false) {
+            const rootPath = document.getElementById('inp-root-path').value.trim();
+            if (!rootPath) return alert("Please enter a path.");
+
+            document.getElementById('tree-container').innerHTML = '<div style="color:var(--text-dim); text-align:center; margin-top:20px;">Loading...</div>';
+
+            try {
+                const data = await fetchAPI(`/api/fs/list?path=${encodeURIComponent(rootPath)}`);
+                treeData = data;
+                if (!keepState) {
+                    treeState = {}; // Reset state on new load
+                }
+                renderTree();
+            } catch (e) {
+                document.getElementById('tree-container').innerHTML = `<div style="color:var(--error-color); text-align:center; margin-top:20px;">Error: ${e.message}</div>`;
+            }
+        }
+
+        function renderTree() {
+            const container = document.getElementById('tree-container');
+            container.innerHTML = '';
+
+            if (!treeData || !treeData.children) {
+                container.innerHTML = '<div style="color:var(--text-dim); text-align:center; margin-top:20px;">Empty directory or invalid path.</div>';
+                return;
+            }
+
+            const ul = document.createElement('ul');
+            ul.className = 'tree root';
+
+            // Sort: folders first, then files
+            const sortedChildren = [...treeData.children].sort((a, b) => {
+                if (a.is_dir && !b.is_dir) return -1;
+                if (!a.is_dir && b.is_dir) return 1;
+                return a.name.localeCompare(b.name);
+            });
+
+            sortedChildren.forEach(child => ul.appendChild(createNode(child, treeData.path)));
+            container.appendChild(ul);
+            updateStats();
+        }
+
+        function createNode(node, rootPath) {
+            const li = document.createElement('li');
+            li.className = 'tree-node';
+
+            const relPath = node.path.substring(rootPath.length).replace(/^[/\\]+/, '');
+
+            // Init state
+            if (!treeState[relPath]) {
+                treeState[relPath] = { include: false, expand: false, is_dir: node.is_dir };
+            }
+
+            const row = document.createElement('div');
+            row.className = 'node-row';
+
+            const toggle = document.createElement('span');
+            toggle.className = 'node-toggle';
+            if (node.is_dir) {
+                toggle.innerHTML = '▶';
+                toggle.onclick = () => toggleFolder(li, node, rootPath);
+            } else {
+                toggle.innerHTML = ' ';
+            }
+
+            const icon = document.createElement('span');
+            icon.className = 'node-icon';
+            icon.innerText = node.is_dir ? '📁' : '📄';
+
+            const name = document.createElement('span');
+            name.className = 'node-name';
+            name.innerText = node.name;
+            name.title = relPath;
+
+            const explanation = document.createElement('span');
+            explanation.className = 'node-explanation';
+            // Basic heuristic for UI
+            if(node.is_dir) {
+                if(node.name === '.git') explanation.innerText = 'Git repository data';
+                if(node.name === 'node_modules') explanation.innerText = 'Node dependencies';
+            }
+
+            const checkboxes = document.createElement('div');
+            checkboxes.className = 'node-checkboxes';
+
+            const chkInclude = document.createElement('input');
+            chkInclude.type = 'checkbox';
+            chkInclude.checked = treeState[relPath].include;
+            chkInclude.onchange = (e) => {
+                treeState[relPath].include = e.target.checked;
+                // If folder, recursively set children? (Optional logic)
+                updateStats();
+            };
+            const lblInclude = document.createElement('label');
+            lblInclude.className = 'chk-label';
+            lblInclude.appendChild(chkInclude);
+            lblInclude.appendChild(document.createTextNode('Inc'));
+
+            const chkExpand = document.createElement('input');
+            chkExpand.type = 'checkbox';
+            chkExpand.checked = treeState[relPath].expand;
+            chkExpand.onchange = (e) => {
+                treeState[relPath].expand = e.target.checked;
+                updateStats();
+            };
+            const lblExpand = document.createElement('label');
+            lblExpand.className = 'chk-label';
+            lblExpand.appendChild(chkExpand);
+            lblExpand.appendChild(document.createTextNode('Exp'));
+
+            checkboxes.appendChild(lblInclude);
+            checkboxes.appendChild(lblExpand);
+
+            row.appendChild(toggle);
+            row.appendChild(icon);
+            row.appendChild(name);
+            row.appendChild(explanation);
+
+            if (node.is_dir) {
+                const btnRecInc = document.createElement('button');
+                btnRecInc.className = 'rec-btn';
+                btnRecInc.innerText = 'R-Inc';
+                btnRecInc.onclick = () => { recursiveSet(relPath, 'include', !treeState[relPath].include); };
+
+                const btnRecExp = document.createElement('button');
+                btnRecExp.className = 'rec-btn';
+                btnRecExp.innerText = 'R-Exp';
+                btnRecExp.onclick = () => { recursiveSet(relPath, 'expand', !treeState[relPath].expand); };
+
+                const recContainer = document.createElement('div');
+                recContainer.style.display = 'flex';
+                recContainer.appendChild(btnRecInc);
+                recContainer.appendChild(btnRecExp);
+
+                row.appendChild(recContainer);
+            }
+
+            row.appendChild(checkboxes);
+
+            li.appendChild(row);
+
+            // Container for children
+            if (node.is_dir) {
+                const childContainer = document.createElement('ul');
+                childContainer.className = 'tree hidden';
+                li.appendChild(childContainer);
+            }
+
+            return li;
+        }
+
+        async function toggleFolder(li, node, rootPath) {
+            const toggle = li.querySelector('.node-toggle');
+            const childContainer = li.querySelector('ul');
+
+            if (childContainer.classList.contains('hidden')) {
+                // Expand
+                toggle.innerHTML = '▼';
+                childContainer.classList.remove('hidden');
+
+                // Lazy load if empty
+                if (childContainer.children.length === 0) {
+                    toggle.innerHTML = '...';
+                    try {
+                        const data = await fetchAPI(`/api/fs/list?path=${encodeURIComponent(node.path)}`);
+                        toggle.innerHTML = '▼';
+
+                        if (data.children) {
+                            const sortedChildren = [...data.children].sort((a, b) => {
+                                if (a.is_dir && !b.is_dir) return -1;
+                                if (!a.is_dir && b.is_dir) return 1;
+                                return a.name.localeCompare(b.name);
+                            });
+
+                            sortedChildren.forEach(child => {
+                                childContainer.appendChild(createNode(child, rootPath));
+                            });
+                        }
+                    } catch (e) {
+                        toggle.innerHTML = '▶';
+                        childContainer.classList.add('hidden');
+                        alert("Error loading folder: " + e.message);
+                    }
+                }
+            } else {
+                // Collapse
+                toggle.innerHTML = '▶';
+                childContainer.classList.add('hidden');
+            }
+        }
+
+        // --- Selection Helpers ---
+        function recursiveSet(prefix, type, value) {
+            const prefixPath = prefix + '/';
+            treeState[prefix][type] = value;
+            for (let path in treeState) {
+                if (path.startsWith(prefixPath)) {
+                    treeState[path][type] = value;
+                }
+            }
+            refreshCheckboxes();
+            updateStats();
+        }
+
+        function selectAll(type) {
+            for (let path in treeState) {
+                treeState[path][type] = true;
+            }
+            refreshCheckboxes();
+            updateStats();
+        }
+        function clearAll(type) {
+            for (let path in treeState) {
+                treeState[path][type] = false;
+            }
+            refreshCheckboxes();
+            updateStats();
+        }
+
+        function refreshCheckboxes() {
+            document.querySelectorAll('.tree-node').forEach(li => {
+                const row = li.querySelector('.node-row');
+                const nameEl = row.querySelector('.node-name');
+                const relPath = nameEl.title;
+                if(treeState[relPath]) {
+                    const chks = row.querySelectorAll('input[type="checkbox"]');
+                    chks[0].checked = treeState[relPath].include;
+                    chks[1].checked = treeState[relPath].expand;
+                }
+            });
+        }
+
+        function updateStats() {
+            let inc = 0, exp = 0;
+            for(let k in treeState) {
+                if(treeState[k].include) inc++;
+                if(treeState[k].expand) exp++;
+            }
+            document.getElementById('tree-stats').innerText = `${inc} Included | ${exp} Expanded`;
+        }
+
+        function togglePreview() {
+            document.getElementById('preview-panel').classList.toggle('active');
+        }
+
+        // --- Compile & Inject ---
+        async function compileTree() {
+            if (!treeData) return alert("Please load a folder first.");
+
+            // Build the payload
+            const payload = {
+                root_path: treeData.path,
+                root_name: treeData.name,
+                selections: treeState
+            };
+
+            const btn = document.querySelector('button[onclick="compileTree()"]');
+            btn.innerText = "Compiling...";
+            document.getElementById('char-count').innerText = "";
+
+            try {
+                const res = await fetchAPI('/api/fs/compile', 'POST', payload);
+                document.getElementById('compile-preview').value = res.artifact;
+                document.getElementById('char-count').innerText = `(${res.artifact.length} chars)`;
+                document.getElementById('preview-panel').classList.add('active');
+                document.getElementById('btn-inject').style.display = 'inline-block';
+            } catch (e) {
+                alert("Compile failed: " + e.message);
+            } finally {
+                btn.innerText = "Compile & Preview";
+            }
+        }
+
+        function copyPreview() {
+            const txt = document.getElementById('compile-preview').value;
+            navigator.clipboard.writeText(txt).then(() => alert("Copied to clipboard."));
+        }
+
+        async function injectContext() {
+            const artifact = document.getElementById('compile-preview').value;
+            if(!artifact) return alert("Nothing to inject.");
+
+            try {
+                await fetchAPI('/api/fs/inject', 'POST', { artifact: artifact });
+                alert("Context injected successfully. It will be added immediately after the system prompt on the next run.");
+            } catch (e) {
+                alert("Injection failed: " + e.message);
+            }
+        }
+
+        async function clearContext() {
+            try {
+                await fetchAPI('/api/fs/inject', 'DELETE');
+                alert("Injected context cleared.");
+            } catch (e) {
+                alert("Failed to clear context: " + e.message);
+            }
+        }
+
+        // --- Profiles ---
+        let currentModalMode = '';
+        async function openProfileModal(mode) {
+            currentModalMode = mode;
+            const modal = document.getElementById('profile-modal');
+            const inp = document.getElementById('inp-profile-name');
+            const sel = document.getElementById('sel-profile');
+            const title = document.getElementById('modal-title');
+            const btn = document.getElementById('btn-modal-action');
+
+            if (mode === 'save') {
+                title.innerText = "Save Profile";
+                inp.style.display = 'block';
+                sel.style.display = 'none';
+                btn.innerText = "Save";
+                btn.onclick = saveProfile;
+            } else {
+                title.innerText = "Load Profile";
+                inp.style.display = 'none';
+                sel.style.display = 'block';
+                btn.innerText = "Load";
+                btn.onclick = loadProfile;
+
+                // Fetch profiles
+                try {
+                    const profiles = await fetchAPI('/api/fs/profiles');
+                    sel.innerHTML = profiles.map(p => `<option value="${p}">${p}</option>`).join('');
+                } catch(e) {
+                    alert("Failed to load profiles: " + e.message);
+                    return;
+                }
+            }
+            modal.style.display = 'flex';
+        }
+
+        function closeProfileModal() {
+            document.getElementById('profile-modal').style.display = 'none';
+        }
+
+        async function saveProfile() {
+            const name = document.getElementById('inp-profile-name').value.trim();
+            if(!name) return alert("Enter a name.");
+            if(!treeData) return alert("Load a folder first.");
+
+            const payload = {
+                name: name,
+                root_path: treeData.path,
+                selections: treeState
+            };
+
+            try {
+                await fetchAPI('/api/fs/profiles', 'POST', payload);
+                closeProfileModal();
+                alert("Profile saved.");
+            } catch(e) {
+                alert("Failed to save: " + e.message);
+            }
+        }
+
+        async function loadProfile() {
+            const name = document.getElementById('sel-profile').value;
+            if(!name) return;
+
+            try {
+                const data = await fetchAPI(`/api/fs/profiles/${name}`);
+                document.getElementById('inp-root-path').value = data.root_path;
+                treeState = data.selections || {};
+
+                // Reload tree and apply state
+                await loadTree(true);
+                refreshCheckboxes();
+                updateStats();
+                closeProfileModal();
+            } catch(e) {
+                alert("Failed to load: " + e.message);
+            }
+        }
+
+    </script>
+</body>
+</html>

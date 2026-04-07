@@ -1,0 +1,6 @@
+{
+  "begin_bracket": "###MEMORY_ARCHITECTURE_START###",
+  "end_bracket": "###MEMORY_ARCHITECTURE_END###",
+  "rwi_text": "Memory source hierarchy and persistence behavior.",
+  "content_file": "content.txt"
+}

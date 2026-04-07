@@ -1,0 +1,36 @@
+INFO:     Started server process [5168]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8080 (Press CTRL+C to quit)
+[System] Logging to session: logs/session_20260201_063347
+Settings loaded successfully
+Next job flag initialized to 'false'
+LLM status flag initialized to 'idle'
+Loaded 1 job definitions from jobs.json: ['chat_pair_summary']
+Settings loaded successfully
+Next job flag initialized to 'false'
+LLM status flag initialized to 'idle'
+Starting server on port 8080...
+[System] Loaded admin token from admin_token.txt
+[Info] System: Backend started.
+[Scheduler] Starting scheduler loop...
+INFO:     127.0.0.1:47738 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47738 - "GET /sw.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47748 - "GET /favicon.ico HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47738 - "GET /manifest.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47748 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47748 - "POST /api/verify_token HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47748 - "GET /modules/Job%20Manager.html HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47748 - "GET /api/automation/jobs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47738 - "GET /api/automation/cycles HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47754 - "GET /api/automation/schedule HTTP/1.1" 200 OK
+INFO:     127.0.0.1:42158 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:42158 - "GET /sw.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:42158 - "GET /manifest.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:42164 - "GET /favicon.ico HTTP/1.1" 200 OK
+INFO:     127.0.0.1:42164 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:42164 - "POST /api/verify_token HTTP/1.1" 200 OK
+INFO:     127.0.0.1:42164 - "GET /modules/Job%20Manager.html HTTP/1.1" 200 OK
+INFO:     127.0.0.1:42164 - "GET /api/automation/jobs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:42158 - "GET /api/automation/cycles HTTP/1.1" 200 OK
+INFO:     127.0.0.1:42168 - "GET /api/automation/schedule HTTP/1.1" 200 OK

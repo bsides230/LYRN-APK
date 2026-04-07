@@ -1,0 +1,57 @@
+INFO:     Started server process [3054]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8080 (Press CTRL+C to quit)
+[System] Logging to session: logs/session_20260206_001109
+Settings loaded successfully
+Next job flag initialized to 'false'
+LLM status flag initialized to 'idle'
+Loaded 2 job definitions from jobs.json: ['chat_pair_summary', 'test_job_scripts']
+Settings loaded successfully
+Next job flag initialized to 'false'
+LLM status flag initialized to 'idle'
+[System] Allowed Origins: ['http://localhost:8080', 'http://127.0.0.1:8080']
+Starting server on port 8080...
+[System] Warning: No admin token found (admin_token.txt or LYRN_MODEL_TOKEN). Model management will be unavailable.
+[Info] System: Backend started.
+[Scheduler] Starting scheduler loop...
+INFO:     127.0.0.1:34810 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34810 - "GET /sw.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34810 - "GET /manifest.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34812 - "GET /favicon.ico HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34812 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34812 - "GET /api/auth/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34812 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34812 - "GET /api/auth/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34812 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34812 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34812 - "GET /api/auth/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34812 - "GET /sw.js HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:34812 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34812 - "GET /api/auth/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34812 - "GET /modules/ServerStatus.html HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34812 - "GET /modules/ServerStatus.html HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34812 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34812 - "GET /sw.js HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:34812 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40632 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40632 - "GET /sw.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40632 - "GET /manifest.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40634 - "GET /favicon.ico HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40634 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40634 - "GET /api/auth/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40634 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40634 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40634 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40634 - "GET /api/auth/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40634 - "GET /sw.js HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:40634 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40634 - "GET /modules/ServerStatus.html HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40634 - "GET /modules/ServerStatus.html HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40634 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40634 - "GET /sw.js HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:40634 - "GET /health HTTP/1.1" 200 OK
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [3054]

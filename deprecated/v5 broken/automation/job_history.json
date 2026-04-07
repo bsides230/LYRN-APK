@@ -1,0 +1,45 @@
+[
+  {
+    "id": "hist_1773878755404",
+    "job_name": "chat_response_job",
+    "timestamp": "2026-03-19T00:05:55.404198",
+    "status": "failed",
+    "scripts_run": 1,
+    "details": [
+      {
+        "script": "spawn_chat_watcher.py",
+        "status": "timeout",
+        "timestamp": 1773878755.4041634
+      }
+    ]
+  },
+  {
+    "id": "hist_1773878690335",
+    "job_name": "chat_input_job",
+    "timestamp": "2026-03-19T00:04:50.335305",
+    "status": "success",
+    "scripts_run": 1,
+    "details": [
+      {
+        "message": "Prompt triggered successfully."
+      }
+    ],
+    "filepath": "/app/jobs/job_model_output.txt"
+  },
+  {
+    "id": "hist_1773878690333",
+    "job_name": "chat_input_job",
+    "timestamp": "2026-03-19T00:04:50.333818",
+    "status": "success",
+    "scripts_run": 1,
+    "details": [
+      {
+        "script": "route_chat.py",
+        "status": "success",
+        "stdout": "--- route_chat.py executed ---\nSuccessfully queued chat_response_job.\n",
+        "stderr": "",
+        "timestamp": 1773878690.3337972
+      }
+    ]
+  }
+]

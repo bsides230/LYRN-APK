@@ -1,0 +1,112 @@
+[
+  {
+    "name": "rwi",
+    "pinned": true,
+    "active": true,
+    "order": 0,
+    "config": {
+      "begin_bracket": "###RWI_INSTRUCTIONS_START###",
+      "end_bracket": "###RWI_INSTRUCTIONS_END###",
+      "rwi_text": "Relational Web Index header. Lists all active components and how to interpret them."
+    }
+  },
+  {
+    "name": "core_identity",
+    "pinned": true,
+    "active": true,
+    "order": 1,
+    "config": {
+      "begin_bracket": "###CORE_IDENTITY_START###",
+      "end_bracket": "###CORE_IDENTITY_END###",
+      "rwi_text": "Foundational identity, philosophy, and purpose."
+    }
+  },
+  {
+    "name": "behavioral_directives",
+    "pinned": true,
+    "active": true,
+    "order": 2,
+    "config": {
+      "begin_bracket": "###BEHAVIORAL_DIRECTIVES_START###",
+      "end_bracket": "###BEHAVIORAL_DIRECTIVES_END###",
+      "rwi_text": "Required interaction style, pacing, and response discipline."
+    }
+  },
+  {
+    "name": "relational_presence",
+    "pinned": false,
+    "active": true,
+    "order": 3,
+    "config": {
+      "begin_bracket": "###RELATIONAL_PRESENCE_START###",
+      "end_bracket": "###RELATIONAL_PRESENCE_END###",
+      "rwi_text": "Emotional cadence, presence model, and how to hold conversational space."
+    }
+  },
+  {
+    "name": "emotional_intelligence",
+    "pinned": false,
+    "active": true,
+    "order": 4,
+    "config": {
+      "begin_bracket": "###EMOTIONAL_INTELLIGENCE_START###",
+      "end_bracket": "###EMOTIONAL_INTELLIGENCE_END###",
+      "rwi_text": "Tone reading, pacing adaptation, and relational attunement."
+    }
+  },
+  {
+    "name": "session_continuity",
+    "pinned": false,
+    "active": true,
+    "order": 5,
+    "config": {
+      "begin_bracket": "###SESSION_CONTINUITY_START###",
+      "end_bracket": "###SESSION_CONTINUITY_END###",
+      "rwi_text": "Session opening, continuity handling, and memory usage rules."
+    }
+  },
+  {
+    "name": "memory_architecture",
+    "pinned": false,
+    "active": true,
+    "order": 6,
+    "config": {
+      "begin_bracket": "###MEMORY_ARCHITECTURE_START###",
+      "end_bracket": "###MEMORY_ARCHITECTURE_END###",
+      "rwi_text": "Memory source hierarchy and persistence behavior."
+    }
+  },
+  {
+    "name": "contextual_adaptation",
+    "pinned": false,
+    "active": true,
+    "order": 7,
+    "config": {
+      "begin_bracket": "###CONTEXTUAL_ADAPTATION_START###",
+      "end_bracket": "###CONTEXTUAL_ADAPTATION_END###",
+      "rwi_text": "Guidance for adapting depth, tone, and structure to the moment."
+    }
+  },
+  {
+    "name": "personality_matrix",
+    "pinned": false,
+    "active": true,
+    "order": 8,
+    "config": {
+      "begin_bracket": "###PERSONALITY_MATRIX_START###",
+      "end_bracket": "###PERSONALITY_MATRIX_END###",
+      "rwi_text": "Identity traits, behavioral biases, and stable dispositions."
+    }
+  },
+  {
+    "name": "user_preferences",
+    "pinned": false,
+    "active": true,
+    "order": 9,
+    "config": {
+      "begin_bracket": "###USER_PREFERENCES_START###",
+      "end_bracket": "###USER_PREFERENCES_END###",
+      "rwi_text": "Reserved for user-specific preferences and knobs."
+    }
+  }
+]

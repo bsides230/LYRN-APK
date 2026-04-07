@@ -1,0 +1,106 @@
+INFO:     Started server process [41837]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8080 (Press CTRL+C to quit)
+[System] Logging to session: logs/session_20260406_092134
+Settings loaded successfully
+Next job flag initialized to 'false'
+LLM status flag initialized to 'idle'
+No jobs.json found. Creating default examples.
+Could not create default jobs file: [Errno 2] No such file or directory: 'automation/jobs/jobs.json'
+Settings loaded successfully
+Next job flag initialized to 'false'
+LLM status flag initialized to 'idle'
+[System] Allowed Origins: ['http://localhost:8080', 'http://127.0.0.1:8080']
+Starting server on port 8080...
+[System] Warning: No admin token found (admin_token.txt or LYRN_MODEL_TOKEN). Model management will be unavailable.
+[Info] System: Backend started.
+[Scheduler] Starting scheduler loop...
+INFO:     127.0.0.1:35896 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35896 - "GET /sw.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35896 - "GET /manifest.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35906 - "GET /favicon.ico HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35906 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35906 - "GET /api/auth/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49566 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49566 - "GET /sw.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49566 - "GET /manifest.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49570 - "GET /favicon.ico HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49570 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49570 - "GET /api/auth/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49570 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49570 - "GET /api/auth/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49570 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49570 - "GET /api/auth/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49570 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49570 - "GET /api/auth/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49570 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49570 - "GET /api/auth/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49570 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49570 - "GET /api/auth/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49570 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49570 - "GET /api/auth/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49570 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49570 - "GET /api/auth/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49570 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49570 - "GET /api/auth/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49570 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49570 - "GET /api/auth/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49570 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49570 - "GET /api/auth/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49570 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49570 - "GET /api/auth/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49570 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49570 - "GET /api/auth/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49570 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49570 - "GET /api/auth/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49570 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49570 - "GET /api/auth/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49570 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49570 - "GET /api/auth/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60626 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60626 - "GET /sw.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60626 - "GET /manifest.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60642 - "GET /favicon.ico HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60642 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60642 - "GET /api/auth/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59678 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59678 - "GET /sw.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59686 - "GET /favicon.ico HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59678 - "GET /manifest.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59678 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59678 - "GET /api/auth/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59678 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59678 - "GET /api/auth/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59678 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59678 - "GET /api/auth/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59678 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59678 - "GET /api/auth/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59678 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59678 - "GET /api/auth/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59678 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59678 - "GET /api/auth/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59678 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59678 - "GET /api/auth/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59678 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59678 - "GET /api/auth/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59678 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59678 - "GET /api/auth/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59678 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59678 - "GET /api/auth/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59678 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59678 - "GET /api/auth/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59678 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59678 - "GET /api/auth/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59678 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59678 - "GET /api/auth/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59678 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59678 - "GET /api/auth/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59678 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59678 - "GET /api/auth/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59678 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59678 - "GET /api/auth/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35192 - "GET /modules/ClaudeCode.html HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55272 - "GET /modules/ClaudeCode.html HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53670 - "GET /modules/ClaudeCode.html HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56308 - "GET /modules/ClaudeCode.html HTTP/1.1" 200 OK

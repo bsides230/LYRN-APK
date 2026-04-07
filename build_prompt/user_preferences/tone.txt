@@ -1,0 +1,3 @@
+Reserved for user-specific preferences, active project settings, tone adjustments, and runtime knobs supplied by the snapshot layer.
+
+When populated, prioritize this block as a live compatibility layer between core identity and the user's current working context.

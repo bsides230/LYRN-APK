@@ -1,0 +1,32 @@
+Traceback (most recent call last):
+  File "/app/lyrn_sad_v7.2.1.pyw", line 3826, in main
+    root = ctk.CTk()
+           ^^^^^^^^^
+  File "/home/jules/.pyenv/versions/3.12.11/lib/python3.12/site-packages/customtkinter/windows/ctk_tk.py", line 40, in __init__
+    CTK_PARENT_CLASS.__init__(self, **pop_from_dict_by_set(kwargs, self._valid_tk_constructor_arguments))
+  File "/home/jules/.pyenv/versions/3.12.11/lib/python3.12/tkinter/__init__.py", line 2346, in __init__
+    self.tk = _tkinter.create(screenName, baseName, className, interactive, wantobjects, useTk, sync, use)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_tkinter.TclError: no display name and no $DISPLAY environment variable
+Warning: Pillow library not found. Image features will be disabled.
+Application error: no display name and no $DISPLAY environment variable
+Press Enter to exit...Application closed.
+Traceback (most recent call last):
+  File "/app/lyrn_sad_v7.2.1.pyw", line 3826, in main
+    root = ctk.CTk()
+           ^^^^^^^^^
+  File "/home/jules/.pyenv/versions/3.12.11/lib/python3.12/site-packages/customtkinter/windows/ctk_tk.py", line 40, in __init__
+    CTK_PARENT_CLASS.__init__(self, **pop_from_dict_by_set(kwargs, self._valid_tk_constructor_arguments))
+  File "/home/jules/.pyenv/versions/3.12.11/lib/python3.12/tkinter/__init__.py", line 2346, in __init__
+    self.tk = _tkinter.create(screenName, baseName, className, interactive, wantobjects, useTk, sync, use)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_tkinter.TclError: no display name and no $DISPLAY environment variable
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/app/lyrn_sad_v7.2.1.pyw", line 3854, in <module>
+    main()
+  File "/app/lyrn_sad_v7.2.1.pyw", line 3847, in main
+    input("Press Enter to exit...")
+EOFError: EOF when reading a line

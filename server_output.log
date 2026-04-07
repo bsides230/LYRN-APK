@@ -1,0 +1,62 @@
+INFO:     Started server process [5563]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8080 (Press CTRL+C to quit)
+[System] Logging to session: logs/session_20260204_020652
+Settings loaded successfully
+Next job flag initialized to 'false'
+LLM status flag initialized to 'idle'
+Loaded 2 job definitions from jobs.json: ['chat_pair_summary', 'test_job_scripts']
+Settings loaded successfully
+Next job flag initialized to 'false'
+LLM status flag initialized to 'idle'
+[System] Allowed Origins: ['http://localhost:8080', 'http://127.0.0.1:8080']
+Starting server on port 8080...
+[System] Loaded admin token from admin_token.txt
+[Info] System: Backend started.
+[Scheduler] Starting scheduler loop...
+INFO:     127.0.0.1:44676 - "GET /modules/Snapshot%20Builder.html HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44676 - "GET /modules/Snapshot%20Builder.html HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:44676 - "GET /modules/Settings.html HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44676 - "GET /modules/Settings.html HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:44676 - "GET /modules/Chat%20Interface.html HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44676 - "GET /modules/Chat%20Interface.html HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:44906 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52300 - "GET /modules/Snapshot%20Builder.html HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52300 - "GET /modules/Snapshot%20Builder.html HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:52300 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52300 - "GET /api/snapshots HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52300 - "GET /api/snapshot HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52300 - "GET /modules/Settings.html HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52300 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52300 - "GET /modules/Settings.html HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:52300 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52300 - "GET /modules/Chat%20Interface.html HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52300 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52300 - "GET /api/chat/history HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52300 - "GET /modules/Chat%20Interface.html HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:52300 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52300 - "GET /api/chat/history HTTP/1.1" 200 OK
+[API] Received chat request: Command 1...
+[System] Created chat file: /app/chat/chat_20260204_020843_555891.txt
+[System] Wrote trigger file: chat_trigger.txt
+INFO:     127.0.0.1:52300 - "POST /api/chat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45734 - "GET /modules/Snapshot%20Builder.html HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45734 - "GET /modules/Snapshot%20Builder.html HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:45734 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45734 - "GET /api/snapshots HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45734 - "GET /api/snapshot HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45734 - "GET /modules/Settings.html HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45734 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45734 - "GET /modules/Settings.html HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:45734 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45734 - "GET /modules/Chat%20Interface.html HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45734 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45734 - "GET /api/chat/history HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45734 - "GET /modules/Chat%20Interface.html HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:45734 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45734 - "GET /api/chat/history HTTP/1.1" 200 OK
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [5563]

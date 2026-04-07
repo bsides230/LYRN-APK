@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LYRN Systems // Current Model Flow</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-core: #050505;
+      --bg-panel: #0a0a0a;
+      --brand-purple: #7c5cff;
+      --brand-purple-dim: rgba(124, 92, 255, 0.12);
+      --text-head: #ffffff;
+      --text-body: #b0b0b0;
+      --text-dim: #666666;
+      --border-color: #222222;
+      --code-bg: #000000;
+      --code-border: #333333;
+      --input-focus-bg: #111111;
+      --green: #79d68a;
+      --amber: #e6c66d;
+      --red: #ff7d7d;
+    }
+
+    body[data-theme="light"] {
+      --bg-core: #ffffff;
+      --bg-panel: #f9f9f9;
+      --brand-purple: #7c5cff;
+      --brand-purple-dim: rgba(124, 92, 255, 0.08);
+      --text-head: #000000;
+      --text-body: #333333;
+      --text-dim: #666666;
+      --border-color: #e5e5e5;
+      --code-bg: #f4f4f6;
+      --code-border: #e0e0e0;
+      --input-focus-bg: #ffffff;
+      --green: #22753a;
+      --amber: #8a6900;
+      --red: #b93f3f;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg-core);
+      color: var(--text-body);
+      font-family: "Inter", system-ui, sans-serif;
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    h1, h2, h3, h4, .mono {
+      font-family: "JetBrains Mono", monospace;
+      color: var(--text-head);
+      margin-top: 0;
+    }
+
+    .page-container {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 40px;
+      min-height: 100vh;
+      border-left: 1px solid var(--border-color);
+      border-right: 1px solid var(--border-color);
+      background: var(--bg-core);
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 24px;
+      align-items: stretch;
+    }
+
+    .hero-card,
+    .panel,
+    .step-card,
+    .layer-card,
+    .mini-panel,
+    .table-wrapper,
+    .callout,
+    .flow-block {
+      background: linear-gradient(180deg, var(--bg-panel) 0%, rgba(0,0,0,0) 100%);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+    }
+
+    .hero-card {
+      padding: 28px;
+    }
+
+    .hero-title {
+      font-size: 34px;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    .meta-label {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 10px;
+      color: var(--brand-purple);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      font-weight: 600;
+      display: inline-block;
+      margin-bottom: 14px;
+    }
+
+    .lede {
+      font-size: 15px;
+      color: var(--text-body);
+      max-width: 760px;
+      margin: 0 0 22px;
+    }
+
+    .hero-tags,
+    .tag-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border-color);
+      background: var(--brand-purple-dim);
+      font-family: "JetBrains Mono", monospace;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-head);
+    }
+
+    .tag span { color: var(--text-dim); }
+
+    .hero-side {
+      display: grid;
+      gap: 16px;
+    }
+
+    .mini-panel {
+      padding: 18px;
+    }
+
+    .mini-panel h3,
+    .panel h3,
+    .step-card h3,
+    .layer-card h3 {
+      font-size: 14px;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .stat {
+      font-family: "JetBrains Mono", monospace;
+      color: var(--text-head);
+      font-size: 22px;
+      margin-bottom: 4px;
+    }
+
+    .section-divider {
+      border-bottom: 1px solid var(--border-color);
+      margin: 42px 0 24px;
+      padding-bottom: 10px;
+      display: flex;
+      align-items: center;
+      color: var(--brand-purple);
+      font-family: "JetBrains Mono", monospace;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+
+    .panel { padding: 22px; }
+    .panel p, .mini-panel p, .step-card p, .layer-card p { margin: 0; font-size: 14px; }
+
+    .callout {
+      padding: 18px 18px 16px;
+      margin-top: 18px;
+      background: linear-gradient(180deg, var(--brand-purple-dim) 0%, rgba(0,0,0,0) 100%);
+    }
+
+    .flow-block {
+      padding: 20px;
+      overflow-x: auto;
+    }
+
+    pre {
+      margin: 0;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 12px;
+      line-height: 1.7;
+      color: var(--text-body);
+      white-space: pre;
+    }
+
+    .steps {
+      display: grid;
+      gap: 14px;
+    }
+
+    .step-card, .layer-card {
+      padding: 18px;
+      position: relative;
+    }
+
+    .step-index,
+    .layer-index {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      border: 1px solid var(--brand-purple);
+      color: var(--text-head);
+      font-family: "JetBrains Mono", monospace;
+      font-size: 11px;
+      margin-bottom: 12px;
+      background: var(--brand-purple-dim);
+    }
+
+    .layer-purpose {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px dashed var(--border-color);
+      color: var(--text-dim);
+      font-size: 13px;
+    }
+
+    .accent-line {
+      height: 1px;
+      width: 100%;
+      margin: 14px 0;
+      background: linear-gradient(90deg, var(--brand-purple), transparent);
+      opacity: 0.8;
+    }
+
+    .table-wrapper {
+      overflow: hidden;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    thead th {
+      text-align: left;
+      font-family: "JetBrains Mono", monospace;
+      color: var(--text-dim);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    tbody td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border-color);
+      vertical-align: top;
+    }
+
+    tbody tr:last-child td { border-bottom: none; }
+    .col-id { color: var(--brand-purple); font-family: "JetBrains Mono", monospace; }
+    .col-main { color: var(--text-head); font-weight: 600; }
+
+    .badge-green { color: var(--green); }
+    .badge-amber { color: var(--amber); }
+    .badge-red { color: var(--red); }
+
+    footer {
+      margin-top: 60px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 10px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .footer-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .theme-toggle-inline {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 10px;
+      color: var(--text-dim);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .theme-switch {
+      position: relative;
+      display: inline-block;
+      width: 34px;
+      height: 18px;
+    }
+
+    .theme-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .theme-switch .slider {
+      position: absolute;
+      cursor: pointer;
+      inset: 0;
+      background-color: #222;
+      border-radius: 999px;
+      border: 1px solid var(--border-color);
+      transition: background-color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .theme-switch .slider::before {
+      content: "";
+      position: absolute;
+      height: 12px;
+      width: 12px;
+      left: 2px;
+      top: 2px;
+      border-radius: 50%;
+      background-color: #ffffff;
+      transition: transform 0.2s ease;
+    }
+
+    .theme-switch input:checked + .slider {
+      background-color: var(--brand-purple-dim);
+      border-color: var(--brand-purple);
+    }
+
+    .theme-switch input:checked + .slider::before {
+      transform: translateX(14px);
+    }
+
+    @media (max-width: 980px) {
+      .hero,
+      .grid-2,
+      .grid-3,
+      .grid-4 {
+        grid-template-columns: 1fr;
+      }
+
+      .page-container { padding: 22px; }
+      .hero-title { font-size: 28px; }
+      footer { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body data-theme="dark">
+  <div class="page-container">
+    <header class="hero">
+      <div class="hero-card">
+        <div class="meta-label">LYRN SYSTEMS · CURRENT MODEL FLOW</div>
+        <h1 class="hero-title">How the Model Actually Runs Right Now</h1>
+        <p class="lede">
+          This page explains the current live LYRN execution path: how the system maintains continuity via the Relational Web Index (RWI), how it leverages the KV Cache for performance, and how temporary job instructions are loaded and unloaded cleanly using Dynamic Snapshots (via DSManager).
+        </p>
+        <div class="hero-tags">
+          <div class="tag">Cognition <span>Memory-Based</span></div>
+          <div class="tag">KV Cache <span>Persistent</span></div>
+          <div class="tag">Instructions <span>Dynamic Snapshots</span></div>
+          <div class="tag">Output <span>Separated</span></div>
+        </div>
+        <div class="callout">
+          <div class="meta-label">Core Principle</div>
+          LYRN moves beyond prompt injection. It loads structured memory into RAM (the Master Snapshot) and reuses it across turns via the KV Cache. Dynamic job logic is injected cleanly as temporary snapshots and drops away when the job is done, preventing prompt drift.
+        </div>
+      </div>
+      <div class="hero-side">
+        <div class="mini-panel">
+          <div class="meta-label">Execution Shape</div>
+          <div class="stat">watch → build → run → capture</div>
+          <p>The runner stays idle until triggered, assembles the active context stack, generates, writes raw output, and then hands the result to the capture layer.</p>
+        </div>
+        <div class="mini-panel">
+          <div class="meta-label">KV Cache Advantage</div>
+          <p>By keeping the static Master Snapshot loaded once and reusing its tokens, the model maintains consistent cognitive behavior without token churn or re-evaluating identity at every step.</p>
+        </div>
+        <div class="mini-panel">
+          <div class="meta-label">Job Scoping</div>
+          <p>Job instructions are now pure Dynamic Snapshots. DSManager activates them early in the context, and turns them off when the job completes, preventing stale instructions from polluting future reasoning.</p>
+        </div>
+      </div>
+    </header>
+
+    <div class="section-divider">01 // End-to-End Runtime Path</div>
+    <div class="flow-block">
+<pre>User types message / Trigger is fired
+       │
+       ▼
+POST /api/chat (or job trigger)
+       │
+       ├─ Writes jobs/job_input.json
+       ├─ Creates global_flags/chat_processing.txt lock
+       └─ Queues chat_input_job
+       │
+       ▼
+Scheduler picks up job
+       │
+       ├─ ds_manager.save_snapshot()   ← Loads Job Instructions
+       ├─ ds_manager.set_snapshot_active(True)
+       ├─ trigger_chat_generation()
+       └─ writes chat_trigger.txt
+       │
+       ▼
+Model Runner detects chat_trigger.txt
+       │
+       ├─ reads structured payload
+       ├─ assembles context layers in exact order (Master -> DS -> History -> Deltas -> User)
+       ├─ reuses KV Cache for unchanged prefix (Master + DS)
+       ├─ runs LLM generation
+       └─ streams raw model text to jobs/job_raw_output.txt
+       │
+       ▼
+chat_watcher_bg.py
+       │
+       ├─ waits until model is idle
+       ├─ extracts final response
+       ├─ writes chat/chat_{timestamp}.txt
+       └─ Scheduler deactivates Dynamic Snapshot: ds_manager.set_snapshot_active(False)
+       │
+       ▼
+Chat UI polls history and displays captured response</pre>
+    </div>
+
+    <div class="section-divider">02 // Injection Order Inside the Model Context</div>
+    <div class="steps">
+      <div class="step-card">
+        <div class="step-index">01</div>
+        <h3>Master Prompt / RWI (Relational Web Index)</h3>
+        <p>Not just memory, and not just a prompt. The RWI is a <strong>structured relational cognition space</strong>. It forms the environment the model operates inside. Because it sits at the bottom of the stack, it stays locked in the model's KV Cache across turns.</p>
+        <div class="layer-purpose">Purpose: Establish the persistent system frame without re-evaluating core identity on every turn.</div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-index">02</div>
+        <h3>Active Dynamic Snapshots (via DSManager)</h3>
+        <p>This layer holds the active Job Instructions. When a job runs, its instructions are activated as a dynamic snapshot. By injecting it early (right after the master prompt), it benefits from KV Cache reuse during the job, but cleanly unloads when the job finishes.</p>
+        <p style="margin-top: 10px;">Snapshots exist in DSManager as registered objects. Only <strong>active snapshots</strong> are injected into the model context, and this injection happens <strong>only during context assembly before generation</strong>. Snapshots are <strong>NOT removed mid-run</strong>. After the job completes, the snapshot is <strong>excluded from the next context build</strong>, ensuring <strong>no stale instructions persist across jobs</strong>.</p>
+        <div class="layer-purpose">Purpose: Inject bounded, temporary job logic without cluttering the bottom of the prompt or impersonating the user.</div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-index">03</div>
+        <h3>Chat History</h3>
+        <p>The runner adds prior user/assistant turns. This preserves the conversational thread, giving the model continuity without confusing history with system-level control layers.</p>
+        <div class="layer-purpose">Purpose: Preserve conversational memory and turn-by-turn context.</div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-index">04</div>
+        <h3>Deltas / Mutable Runtime State</h3>
+        <p>Deltas are injected fresh every run and are <strong>NOT relied on for KV cache reuse</strong>. They represent fast-changing runtime state (like current time or hardware stats) and do <strong>NOT define reasoning structure</strong>. Unlike Snapshots (which persist for a job, affect reasoning, and form the structured cognitive frame), Deltas merely provide immediate environmental awareness.</p>
+        <div class="layer-purpose">Purpose: Inject fast-changing state without rewriting the stable KV-cached layers.</div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-index">05</div>
+        <h3>Actual User Message</h3>
+        <p>The final layer is the real user text as the true <span class="mono">user</span> turn. Everything before it is preparation, framing, or runtime context.</p>
+        <div class="layer-purpose">Purpose: Ensure the model responds directly to the person/input, not to internal orchestration text.</div>
+      </div>
+    </div>
+
+    <div class="section-divider">03 // What Each Layer Is Doing</div>
+    <div class="grid-3">
+      <div class="layer-card">
+        <div class="layer-index">A</div>
+        <h3>RWI / Master Snapshot</h3>
+        <p>Not just memory or a prompt—it is the <strong>structured relational cognition space</strong> that forms the environment the model continuously operates inside.</p>
+      </div>
+      <div class="layer-card">
+        <div class="layer-index">B</div>
+        <h3>Dynamic Snapshots (Job Logic)</h3>
+        <p>Job instructions that <strong>persist for the duration of a job</strong>. They become part of the structured cognitive frame and actively affect reasoning behavior and task execution.</p>
+      </div>
+      <div class="layer-card">
+        <div class="layer-index">C</div>
+        <h3>Conversation History</h3>
+        <p>Recent user/assistant turns. Gives the model continuity and the ability to answer in the context of an ongoing exchange.</p>
+      </div>
+      <div class="layer-card">
+        <div class="layer-index">D</div>
+        <h3>Delta Layer</h3>
+        <p>Fast-changing runtime facts injected fresh every run. They do NOT define reasoning structure and are NOT relied on for KV cache reuse.</p>
+      </div>
+      <div class="layer-card">
+        <div class="layer-index">E</div>
+        <h3>User Turn</h3>
+        <p>The pure, unadulterated user input. Never mixed with system instructions.</p>
+      </div>
+      <div class="layer-card">
+        <div class="layer-index">F</div>
+        <h3>KV Cache Reuse</h3>
+        <p>KV cache reuse depends entirely on <strong>prefix stability</strong>. The Master Snapshot acts as the long-lived cache layer, while Dynamic Snapshots form the job-scoped cache layer. If a Dynamic Snapshot changes, cache reuse stops at that exact point, and everything after that layer is recomputed.</p>
+      </div>
+    </div>
+
+    <div class="section-divider">04 // Why the Order Matters</div>
+    <div class="grid-2">
+      <div class="panel">
+        <div class="meta-label">KV Cache Efficiency</div>
+        <h3>Identity before state</h3>
+        <p>The stack moves from the most stable layers to the most volatile. First comes enduring system identity (RWI), then job framing (Dynamic Snapshots), then history, then live overlays (Deltas), and finally the user turn.</p>
+        <div class="accent-line"></div>
+        <p>This allows the model to cache the early parts of the prompt. If the system identity and job instructions haven't changed since the last turn, the LLM skips parsing them, saving thousands of tokens per run.</p>
+      </div>
+      <div class="panel">
+        <div class="meta-label">Job Boundedness</div>
+        <h3>Instructions via DSManager</h3>
+        <p>In the past, job instructions were appended late, polluting the user's turn. Now, Job Instructions <em>are</em> the Dynamic Snapshot. They are injected cleanly as a system layer.</p>
+        <div class="accent-line"></div>
+        <p>When the job finishes, the Scheduler tells DSManager to deactivate the snapshot. The next job runs with a clean slate, preventing stale instructions from bleeding over.</p>
+      </div>
+    </div>
+
+    <div class="section-divider">05 // Simplified Stack View</div>
+    <div class="flow-block">
+<pre>TOP OF STACK / EARLIEST CONTEXT (CACHED)
+
+[system] Master Snapshot / RWI (Relational Web Index)
+[system] Active Dynamic Snapshots (Job Instructions via DSManager)
+--- KV CACHE STABILITY BREAK ---
+Anything below this line is recomputed every run
+
+[user/assistant] Chat history
+[system] Deltas / mutable runtime overlays
+[user] Actual user message
+
+MODEL GENERATES RESPONSE
+
+raw output → jobs/job_raw_output.txt
+capture layer → chat/chat_{timestamp}.txt
+Scheduler → ds_manager.set_snapshot_active(False)
+UI reads captured history only</pre>
+    </div>
+
+    <footer>
+      <span>LYRN SYSTEMS // CURRENT MODEL FLOW // PUBLIC INFO PAGE</span>
+      <div class="footer-right">
+        <span>STANDALONE HTML</span>
+        <label class="theme-toggle-inline">
+          THEME
+          <span class="theme-switch">
+            <input type="checkbox" id="themeToggle" checked onchange="toggleTheme()" />
+            <span class="slider"></span>
+          </span>
+        </label>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    function toggleTheme() {
+      const body = document.body;
+      const checkbox = document.getElementById('themeToggle');
+      if (!checkbox) return;
+      const theme = checkbox.checked ? 'dark' : 'light';
+      body.setAttribute('data-theme', theme);
+      try { localStorage.setItem('lyrn-flow-theme', theme); } catch (e) {}
+    }
+
+    (function initTheme() {
+      try {
+        const saved = localStorage.getItem('lyrn-flow-theme');
+        const checkbox = document.getElementById('themeToggle');
+        if (saved === 'light') {
+          document.body.setAttribute('data-theme', 'light');
+          if (checkbox) checkbox.checked = false;
+        }
+      } catch (e) {}
+    })();
+  </script>
+</body>
+</html>

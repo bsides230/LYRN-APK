@@ -1,0 +1,40 @@
+__pycache__/
+/chat
+/episodic_memory
+active_chat.txt
+chat_trigger.txt
+
+# Runtime flags
+global_flags/automation.txt
+global_flags/next_job.txt
+global_flags/llm_status.txt
+
+# Automation runtime state
+automation/job_queue.json
+automation/chunk_queue.json
+automation/job_run_counts.json
+automation/job_log.json
+logs/
+admin_token.txt
+global_flags/llm_stats.json
+global_flags/llm_stats.json
+global_flags/llm_stats.json
+global_flags/no_auth
+settings.json.bk
+settings.json.bk
+settings.json.bk
+settings.json.bk
+/snapshots
+
+# Virtual environments
+venv_cold_start/
+
+# Downloaded model files
+models/
+
+# Stray Windows-path named directories
+C:*
+
+# Test artifacts
+.test_venv/
+jobs/

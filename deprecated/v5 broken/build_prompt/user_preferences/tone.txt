@@ -1,0 +1,1 @@
+This section is reserved for user-specific preferences and configuration fields. In the live system it is populated from the snapshot layer.

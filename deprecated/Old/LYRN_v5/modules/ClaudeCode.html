@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LYRN Claude Code Module</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+
+  <!-- xterm.js dependencies -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.css" />
+  <script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.js"></script>
+
+  <style>
+    :root {
+      --bg-core: #050505;
+      --bg-panel: #0a0a0a;
+      --brand-purple: #7c5cff;
+      --text-head: #ffffff;
+      --text-body: #b0b0b0;
+      --text-dim: #666666;
+      --border-color: #222222;
+      --btn-text: #e0e0e0;
+      --btn-border: #444444;
+      --btn-bg: rgba(255,255,255,0.03);
+      --font-size-base: 13px;
+    }
+
+    body[data-theme="light"] {
+        --bg-core: #eef0f4;
+        --bg-panel: #ffffff;
+        --brand-purple: #6a4ce0;
+        --text-head: #111111;
+        --text-body: #333333;
+        --text-dim: #555555;
+        --border-color: #d1d5db;
+        --btn-text: #333;
+        --btn-border: #ccc;
+        --btn-bg: rgba(0,0,0,0.03);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0; padding: 0;
+      background-color: var(--bg-core); color: var(--text-body);
+      font-family: 'Inter', system-ui, sans-serif;
+      height: 100vh; width: 100vw; overflow: hidden;
+      font-size: var(--font-size-base);
+    }
+
+    h1, h2, h3, h4 { font-family: 'JetBrains Mono', monospace; color: var(--text-head); margin: 0; }
+
+    .app-wrapper {
+      display: flex; flex-direction: column; height: 100vh;
+    }
+
+    header {
+      border-bottom: 1px solid var(--border-color); padding: 12px 16px;
+      display: flex; justify-content: space-between; align-items: center;
+      background: var(--bg-panel); flex-shrink: 0;
+    }
+
+    .meta-label { font-family: 'JetBrains Mono'; font-size: calc(var(--font-size-base) - 2px); color: var(--brand-purple); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; display: block; }
+    .panel-title { font-size: calc(var(--font-size-base) + 2px); font-weight: 600; }
+
+    /* LAYOUT: Control Panel (Left) + Terminal (Right) */
+    .main-content {
+      display: flex; flex: 1; overflow: hidden;
+    }
+
+    .control-panel {
+      width: 320px; border-right: 1px solid var(--border-color); background: var(--bg-panel);
+      display: flex; flex-direction: column; overflow-y: auto; padding: 16px; gap: 20px;
+    }
+
+    .terminal-container {
+      flex: 1; background: #000; position: relative;
+    }
+
+    #terminal-wrapper {
+      width: 100%; height: 100%; padding: 8px;
+    }
+
+    /* CONTROL PANEL STYLES */
+    .section { border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-core); overflow: hidden; }
+    .section-header { background: rgba(255,255,255,0.02); padding: 8px 12px; border-bottom: 1px solid var(--border-color); font-family: 'JetBrains Mono'; font-size: 11px; text-transform: uppercase; color: var(--text-dim); }
+    .section-body { padding: 12px; display: flex; flex-direction: column; gap: 12px; }
+
+    .input-group { display: flex; flex-direction: column; gap: 4px; }
+    .input-group label { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; }
+    .input-group input[type="text"], .input-group select {
+      background: var(--bg-panel); border: 1px solid var(--border-color); color: var(--text-head);
+      padding: 6px 8px; border-radius: 4px; font-family: 'JetBrains Mono'; font-size: 12px;
+    }
+
+    .toggle-row { display: flex; justify-content: space-between; align-items: center; font-size: 12px; }
+
+    /* Toggle Switch */
+    .toggle-switch { position: relative; width: 32px; height: 18px; display: inline-block; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--border-color); transition: .4s; border-radius: 18px; }
+    .toggle-slider:before { position: absolute; content: ""; height: 12px; width: 12px; left: 3px; bottom: 3px; background-color: var(--text-dim); transition: .4s; border-radius: 50%; }
+    input:checked + .toggle-slider { background-color: var(--brand-purple); }
+    input:checked + .toggle-slider:before { transform: translateX(14px); background-color: white; }
+
+    /* Buttons */
+    button {
+      font-family: 'JetBrains Mono', monospace; font-size: 11px;
+      background: var(--btn-bg); border: 1px solid var(--btn-border); color: var(--btn-text);
+      padding: 6px 12px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px;
+      transition: all 0.2s ease; border-radius: 4px; font-weight: bold; width: 100%; text-align: left;
+    }
+    button:hover { border-color: var(--brand-purple); color: var(--brand-purple); background: rgba(124, 92, 255, 0.1); }
+    button.btn-primary { background: var(--brand-purple); color: #ffffff; border-color: var(--brand-purple); text-align: center; padding: 10px; font-size: 12px; }
+    button.btn-primary:hover { background: #6a4ce0; color: #fff; }
+
+    .cmd-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+    #toast {
+        position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%);
+        background: var(--bg-panel); border: 1px solid var(--brand-purple);
+        color: var(--text-head); padding: 10px 20px; border-radius: 4px;
+        font-family: 'JetBrains Mono', monospace; font-size: var(--font-size-base);
+        opacity: 0; pointer-events: none; transition: opacity 0.3s;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.8); z-index: 11000;
+    }
+    #toast.show { opacity: 1; }
+  </style>
+</head>
+<body>
+
+  <div class="app-wrapper">
+    <header>
+        <div>
+            <div class="meta-label">LYRN GUI</div>
+            <h1 class="panel-title">Claude Code Control Center</h1>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <button onclick="clearTerminal()" style="width: auto;">Clear Terminal</button>
+            <button onclick="connectTerminal()" style="width: auto; border-color: #10B981; color: #10B981;">Reconnect</button>
+        </div>
+    </header>
+
+    <div class="main-content">
+        <!-- Control Panel -->
+        <div class="control-panel">
+
+            <button class="btn-primary" onclick="launchClaudeCode()">▶ Launch Claude Code</button>
+
+            <!-- Flags & Config -->
+            <div class="section">
+                <div class="section-header">Launch Flags</div>
+                <div class="section-body">
+                    <div class="input-group">
+                        <label>Model (--model)</label>
+                        <select id="flag-model">
+                            <option value="">Default</option>
+                            <option value="claude-3-7-sonnet-20250219">Claude 3.7 Sonnet</option>
+                            <option value="claude-3-5-sonnet-20241022">Claude 3.5 Sonnet</option>
+                            <option value="claude-3-opus-20240229">Claude 3 Opus</option>
+                            <option value="claude-3-5-haiku-20241022">Claude 3.5 Haiku</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Effort Level (--effort)</label>
+                        <select id="flag-effort">
+                            <option value="">Default</option>
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                            <option value="max">Max</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label>System Prompt (--system-prompt)</label>
+                        <input type="text" id="flag-prompt" placeholder="Optional override...">
+                    </div>
+
+                    <div class="toggle-row">
+                        <span>Auto Mode (--enable-auto-mode)</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="flag-auto">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="toggle-row">
+                        <span>Skip Perms (--dangerously-skip-permissions)</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="flag-perms">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Global Commands -->
+            <div class="section">
+                <div class="section-header">Interactive Commands</div>
+                <div class="section-body">
+                    <div class="cmd-grid">
+                        <button onclick="injectCmd('/compact')">/compact</button>
+                        <button onclick="injectCmd('/clear')">/clear</button>
+                        <button onclick="injectCmd('/cost')">/cost</button>
+                        <button onclick="injectCmd('/status')">/status</button>
+                        <button onclick="injectCmd('/doctor')">/doctor</button>
+                        <button onclick="injectCmd('/insights')">/insights</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Auth & Settings -->
+            <div class="section">
+                <div class="section-header">Auth & Proxy</div>
+                <div class="section-body">
+                    <div class="cmd-grid">
+                        <button onclick="injectCmd('claude auth login')">Auth Login</button>
+                        <button onclick="injectCmd('claude auth status')">Auth Status</button>
+                    </div>
+                    <hr style="border:0; border-bottom:1px solid var(--border-color); width: 100%;">
+                    <button class="btn-primary" onclick="injectCmd('claude remote-control')" style="background: transparent; color: var(--brand-purple);">Start Remote Control</button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Terminal View -->
+        <div class="terminal-container">
+            <div id="terminal-wrapper"></div>
+        </div>
+    </div>
+  </div>
+
+  <div id="toast">Message</div>
+
+  <script>
+    let authToken = localStorage.getItem('lyrn_admin_token') || null;
+    let coreUrl = localStorage.getItem('lyrn_core_url') || '';
+
+    // Terminal variables
+    let term = null;
+    let fitAddon = null;
+    let socket = null;
+    let sid = 'claude_code_' + Math.random().toString(36).substr(2, 9);
+
+    document.addEventListener('DOMContentLoaded', () => {
+        initTerminal();
+        connectTerminal();
+
+        window.addEventListener('message', (event) => {
+            if (event.data.type === 'THEME_CHANGE') document.body.setAttribute('data-theme', event.data.theme);
+            if (event.data.type === 'TOKEN_UPDATE') {
+                authToken = event.data.token;
+                connectTerminal();
+            }
+            if (event.data.type === 'CORE_URL_CHANGE') {
+                coreUrl = event.data.url;
+                connectTerminal();
+            }
+        });
+
+        // Handle resize
+        window.addEventListener('resize', () => {
+            if (fitAddon) {
+                try { fitAddon.fit(); } catch(e){}
+            }
+        });
+    });
+
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.innerText = msg;
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    // --- Terminal Logic ---
+    function initTerminal() {
+        const container = document.getElementById('terminal-wrapper');
+        term = new Terminal({
+            cursorBlink: true,
+            theme: {
+                background: '#000000',
+                foreground: '#ffffff',
+                cursor: '#7c5cff'
+            },
+            fontFamily: '"JetBrains Mono", monospace',
+            fontSize: 13,
+            allowProposedApi: true
+        });
+
+        fitAddon = new FitAddon.FitAddon();
+        term.loadAddon(fitAddon);
+        term.open(container);
+
+        // Setup input handler
+        term.onData(data => {
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify({ type: 'input', data: data }));
+            }
+        });
+
+        // Handle terminal resize events
+        term.onResize(size => {
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify({
+                    type: 'resize',
+                    cols: size.cols,
+                    rows: size.rows
+                }));
+            }
+        });
+
+        // Initial fit
+        setTimeout(() => {
+            try { fitAddon.fit(); } catch(e){}
+        }, 100);
+    }
+
+    function clearTerminal() {
+        if(term) term.clear();
+    }
+
+    function connectTerminal() {
+        if (socket) {
+            socket.close();
+            socket = null;
+        }
+
+        if (!coreUrl) {
+            term.writeln('\r\n\x1b[31m[System]\x1b[0m Core URL not set. Waiting for configuration...');
+            return;
+        }
+
+        let wsUrl = coreUrl.replace(/^http/, 'ws');
+        wsUrl += `/api/terminal/${sid}`;
+        if (authToken) {
+            wsUrl += `?token=${encodeURIComponent(authToken)}`;
+        }
+
+        term.writeln('\r\n\x1b[36m[System]\x1b[0m Connecting to terminal...');
+
+        socket = new WebSocket(wsUrl);
+
+        socket.onopen = () => {
+            term.writeln('\r\n\x1b[32m[System]\x1b[0m Connected.\r\n');
+            setTimeout(() => {
+                try { fitAddon.fit(); } catch(e){}
+            }, 100);
+        };
+
+        socket.onmessage = (event) => {
+            try {
+                const msg = JSON.parse(event.data);
+                if (msg.type === 'output') {
+                    term.write(msg.data);
+                }
+            } catch (e) {
+                console.error("Failed to parse WS msg", e);
+            }
+        };
+
+        socket.onclose = () => {
+            term.writeln('\r\n\x1b[31m[System]\x1b[0m Disconnected.\r\n');
+        };
+
+        socket.onerror = (err) => {
+            term.writeln('\r\n\x1b[31m[System]\x1b[0m WebSocket Error.\r\n');
+        };
+    }
+
+    // --- Claude Code Control Logic ---
+    function injectCmd(cmdStr) {
+        if (!socket || socket.readyState !== WebSocket.OPEN) {
+            showToast("Terminal not connected!");
+            return;
+        }
+        socket.send(JSON.stringify({ type: 'input', data: cmdStr + '\r\n' }));
+        term.focus();
+    }
+
+    function launchClaudeCode() {
+        let cmd = "claude";
+
+        const model = document.getElementById('flag-model').value;
+        if (model) cmd += ` --model ${model}`;
+
+        const effort = document.getElementById('flag-effort').value;
+        if (effort) cmd += ` --effort ${effort}`;
+
+        const prompt = document.getElementById('flag-prompt').value;
+        if (prompt) cmd += ` --system-prompt "${prompt.replace(/"/g, '\\"')}"`;
+
+        if (document.getElementById('flag-auto').checked) {
+            cmd += ` --enable-auto-mode`;
+        }
+
+        if (document.getElementById('flag-perms').checked) {
+            cmd += ` --dangerously-skip-permissions`;
+        }
+
+        injectCmd(cmd);
+    }
+  </script>
+</body>
+</html>

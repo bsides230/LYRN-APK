@@ -1,0 +1,68 @@
+[
+  {
+    "name": "rwi",
+    "pinned": true,
+    "active": true,
+    "order": 0,
+    "config": {
+      "begin_bracket": "###RWI_INSTRUCTIONS_START###",
+      "end_bracket": "###RWI_INSTRUCTIONS_END###",
+      "rwi_text": "Relational Web Index header. Lists all active components and how to interpret them."
+    }
+  },
+  {
+    "name": "system_instructions",
+    "pinned": true,
+    "active": true,
+    "order": 1,
+    "config": {
+      "begin_bracket": "###SYSTEM_INSTRUCTIONS_START###",
+      "end_bracket": "###SYSTEM_INSTRUCTIONS_END###",
+      "rwi_text": "Core system instructions."
+    }
+  },
+  {
+    "name": "system_rules",
+    "pinned": true,
+    "active": true,
+    "order": 2,
+    "config": {
+      "begin_bracket": "###SYSTEM_RULES_START###",
+      "end_bracket": "###SYSTEM_RULES_END###",
+      "rwi_text": "Hard constraints on behavior."
+    }
+  },
+  {
+    "name": "ai_preferences",
+    "pinned": false,
+    "active": true,
+    "order": 3,
+    "config": {
+      "begin_bracket": "###AI_PREFERENCES_START###",
+      "end_bracket": "###AI_PREFERENCES_END###",
+      "rwi_text": "AI-specific preferences."
+    }
+  },
+  {
+    "name": "personality",
+    "pinned": false,
+    "active": true,
+    "order": 4,
+    "config": {
+      "begin_bracket": "###PERSONALITY_START###",
+      "end_bracket": "###PERSONALITY_END###",
+      "rwi_text": "AI identity traits and behavioral biases."
+    }
+  },
+  {
+    "name": "user_preferences",
+    "pinned": false,
+    "active": false,
+    "order": 5,
+    "config": {
+      "begin_bracket": "###USER_PREFERENCES_START###",
+      "end_bracket": "###USER_PREFERENCES_END###",
+      "rwi_text": "Reserved for user-specific preferences and knobs."
+    }
+  }
+]

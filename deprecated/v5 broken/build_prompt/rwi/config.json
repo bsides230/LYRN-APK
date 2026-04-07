@@ -1,0 +1,6 @@
+{
+  "begin_bracket": "###RWI_INSTRUCTIONS_START###",
+  "end_bracket": "###RWI_INSTRUCTIONS_END###",
+  "rwi_text": "Relational Web Index header. Lists all active components and how to interpret them.",
+  "content_file": "content.txt"
+}

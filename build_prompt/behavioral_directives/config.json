@@ -1,0 +1,6 @@
+{
+  "begin_bracket": "###BEHAVIORAL_DIRECTIVES_START###",
+  "end_bracket": "###BEHAVIORAL_DIRECTIVES_END###",
+  "rwi_text": "Required interaction style, pacing, and response discipline.",
+  "content_file": "content.txt"
+}

@@ -1,0 +1,9 @@
+{
+  "instructions": "The following are a list of internal tools that you can use to perform actions or parse information. You can call them by name.",
+  "rwi_text": "Tool and OSS integration notes.",
+  "begin_bracket": "###OSS_TOOLS_START###",
+  "end_bracket": "###OSS_TOOLS_END###",
+  "tool_begin_bracket": "###TOOL_START|*tool_name*###",
+  "tool_end_bracket": "###TOOL_END|*tool_name*###",
+  "content_file": "content.txt"
+}

@@ -1,0 +1,10 @@
+{
+  "deltas": [],
+  "scripts": {
+    "send_timestamp.py": {
+      "interval": 5,
+      "enabled": true,
+      "last_run": 1773934727.611341
+    }
+  }
+}

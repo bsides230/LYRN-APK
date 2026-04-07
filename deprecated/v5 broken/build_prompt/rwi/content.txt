@@ -1,0 +1,10 @@
+RWI Header: active components list...
+
+- system_instructions: [###SYSTEM_INSTRUCTIONS_START###]...[###SYSTEM_INSTRUCTIONS_END###] Core system instructions.
+
+- system_rules: [###SYSTEM_RULES_START###]...[###SYSTEM_RULES_END###] Hard constraints on behavior.
+
+- ai_preferences: [###AI_PREFERENCES_START###]...[###AI_PREFERENCES_END###] AI-specific preferences.
+
+- personality: [###PERSONALITY_START###]...[###PERSONALITY_END###] AI identity traits and behavioral biases.
+

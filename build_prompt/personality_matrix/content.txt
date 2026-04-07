@@ -1,0 +1,23 @@
+"Clarity = 0940"
+"Humility = 0960"
+"Empathy = 0910"
+"Patience = 0930"
+"Integrity = 0970"
+
+"Directness = 0840"
+"Warmth = 0720"
+"Verbosity = 0420"
+"Emotional_Resonance = 0900"
+"Stillness_Tolerance = 0950"
+
+"Curiosity = 0870"
+"Reflectiveness = 0940"
+"Adaptability = 0910"
+"Relational_Awareness = 0950"
+"Identity_Stability = 0940"
+
+"Assertiveness = 0710"
+"Deference = 0300"
+"Sentimentality = 0280"
+"Defensiveness = 0050"
+"Need_For_Approval = 0020"

@@ -1,0 +1,1430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Claude Code Control Center</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+
+  <!-- xterm.js dependencies -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.css" />
+  <script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.js"></script>
+
+  <style>
+    /* =========================================
+       CORE VARIABLES (Matches other LYRN modules)
+       ========================================= */
+    :root {
+      --bg-core: #050505;
+      --bg-panel: #0a0a0a;
+      --bg-input: #050505;
+      --brand-purple: #7c5cff;
+      --brand-purple-dim: rgba(124, 92, 255, 0.1);
+      --text-head: #ffffff;
+      --text-body: #b0b0b0;
+      --text-dim: #666666;
+      --border-color: #222222;
+      --status-ok: #10B981;
+      --status-warn: #F59E0B;
+      --status-err: #EF4444;
+      --font-size-base: 13px;
+    }
+
+    body[data-theme="light"] {
+      --bg-core: #eef0f4;
+      --bg-panel: #ffffff;
+      --bg-input: #ffffff;
+      --brand-purple: #6a4ce0;
+      --brand-purple-dim: rgba(106, 76, 224, 0.1);
+      --text-head: #111111;
+      --text-body: #333333;
+      --text-dim: #555555;
+      --border-color: #d1d5db;
+    }
+
+    * { box-sizing: border-box; }
+
+    /* --- THEMED SCROLLBARS --- */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; border: 2px solid transparent; background-clip: content-box; }
+    ::-webkit-scrollbar-thumb:hover { background-color: var(--brand-purple); }
+
+    body {
+      margin: 0; padding: 0;
+      background-color: var(--bg-core); color: var(--text-body);
+      font-family: 'Inter', sans-serif;
+      height: 100vh; width: 100vw; overflow: hidden;
+      font-size: var(--font-size-base);
+    }
+
+    h2 {
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text-head);
+      font-size: 16px;
+      margin: 0;
+    }
+
+    .app-wrapper { display: flex; flex-direction: column; height: 100vh; }
+
+    /* --- HEADER (matches module convention) --- */
+    header {
+      border-bottom: 1px solid var(--border-color);
+      padding: 14px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--bg-panel);
+      flex-shrink: 0;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+    header .title-block { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+    .meta-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--brand-purple);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+    .header-actions { display: flex; gap: 8px; align-items: center; }
+    .icon-btn {
+      width: 30px;
+      height: 30px;
+      min-width: 30px;
+      padding: 0;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      line-height: 1;
+      font-weight: 600;
+    }
+    #mobile-menu-btn {
+      display: none;
+      width: 32px;
+      height: 32px;
+      min-width: 32px;
+      padding: 0;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    /* --- STATUS PILL --- */
+    .status-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-family: 'JetBrains Mono', monospace; font-size: 10px;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      padding: 4px 10px; border-radius: 12px;
+      border: 1px solid var(--border-color); color: var(--text-dim);
+      background: var(--bg-core);
+    }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-dim); }
+    .status-pill.connected { color: var(--status-ok); border-color: var(--status-ok); }
+    .status-pill.connected .status-dot { background: var(--status-ok); box-shadow: 0 0 6px var(--status-ok); }
+    .status-pill.connecting { color: var(--status-warn); border-color: var(--status-warn); }
+    .status-pill.connecting .status-dot { background: var(--status-warn); }
+    .status-pill.error { color: var(--status-err); border-color: var(--status-err); }
+    .status-pill.error .status-dot { background: var(--status-err); }
+
+    /* --- LAYOUT --- */
+    .main-content { display: flex; flex: 1; overflow: hidden; }
+
+    .control-panel {
+      width: clamp(420px, 38vw, 560px);
+      min-width: 420px;
+      max-width: 560px;
+      border-right: 1px solid var(--border-color);
+      background: var(--bg-panel);
+      display: flex; flex-direction: column;
+      overflow-y: auto; padding: 16px; gap: 16px;
+      resize: horizontal;
+      overflow-x: hidden;
+    }
+
+    .terminal-container {
+      flex: 1; background: #000; position: relative; min-width: 0;
+    }
+    #terminal-wrapper { width: 100%; height: 100%; padding: 8px; }
+
+    /* --- SECTIONS --- */
+    .section {
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background: var(--bg-core);
+      overflow: hidden;
+    }
+    .section-header {
+      background: var(--brand-purple-dim);
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border-color);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--brand-purple);
+    }
+    .section-body { padding: 12px; display: flex; flex-direction: column; gap: 12px; }
+
+    /* --- INPUTS --- */
+    .input-group { display: flex; flex-direction: column; gap: 4px; }
+    .input-group label {
+      font-size: 10px; color: var(--text-dim);
+      text-transform: uppercase; letter-spacing: 0.5px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .input-group input[type="text"], .input-group select {
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      color: var(--text-head);
+      padding: 8px 10px;
+      min-height: 36px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      outline: none;
+    }
+
+    textarea#cmd-preview {
+      min-height: 88px;
+      line-height: 1.45;
+    }
+    .input-group input[type="text"]:focus,
+    .input-group select:focus { border-color: var(--brand-purple); }
+
+    .toggle-row {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 11px; color: var(--text-body);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Toggle Switch */
+    .toggle-switch { position: relative; width: 32px; height: 18px; display: inline-block; flex-shrink: 0; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider { position: absolute; cursor: pointer; inset: 0; background-color: var(--border-color); transition: .3s; border-radius: 18px; }
+    .toggle-slider:before { position: absolute; content: ""; height: 12px; width: 12px; left: 3px; bottom: 3px; background-color: var(--text-dim); transition: .3s; border-radius: 50%; }
+    input:checked + .toggle-slider { background-color: var(--brand-purple); }
+    input:checked + .toggle-slider:before { transform: translateX(14px); background-color: white; }
+
+    /* --- BUTTONS --- */
+    button {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      background: var(--bg-panel);
+      border: 1px solid var(--border-color);
+      color: var(--text-head);
+      padding: 6px 10px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: all 0.15s ease;
+      border-radius: 4px;
+      width: 100%;
+      text-align: center;
+    }
+    button:hover { border-color: var(--brand-purple); color: var(--brand-purple); background: var(--brand-purple-dim); }
+    button.btn-primary {
+      background: var(--brand-purple);
+      color: #fff;
+      border-color: var(--brand-purple);
+      padding: 10px;
+      font-size: 12px;
+    }
+    button.btn-primary:hover { background: #6a4ce0; color: #fff; border-color: #6a4ce0; }
+    button.btn-ghost { background: transparent; }
+
+    .header-actions button { width: auto; padding: 5px 10px; }
+
+    .cmd-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+    .divider { border: 0; border-top: 1px solid var(--border-color); margin: 4px 0; }
+
+    /* --- TOAST --- */
+    #toast {
+      position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+      background: var(--bg-panel); border: 1px solid var(--brand-purple);
+      color: var(--text-head); padding: 10px 18px; border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace; font-size: 12px;
+      opacity: 0; pointer-events: none; transition: opacity 0.3s;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6); z-index: 11000;
+    }
+    #toast.show { opacity: 1; }
+
+    /* --- Run List --- */
+    .run-list { display: flex; flex-direction: column; gap: 6px; max-height: 240px; overflow-y: auto; }
+    .run-item {
+      border: 1px solid var(--border-color); border-radius: 4px;
+      padding: 6px 8px; background: var(--bg-panel); cursor: pointer;
+      font-family: 'JetBrains Mono', monospace; font-size: 10px;
+      display: flex; flex-direction: column; gap: 2px;
+    }
+    .run-item:hover { border-color: var(--brand-purple); }
+    .run-item .row { display: flex; justify-content: space-between; gap: 6px; }
+    .run-item .label { color: var(--text-head); font-weight: 600; }
+    .run-item .meta { color: var(--text-dim); font-size: 9px; }
+    .run-status { font-size: 9px; padding: 1px 6px; border-radius: 8px; text-transform: uppercase; }
+    .run-status.running   { color: var(--status-warn); border: 1px solid var(--status-warn); }
+    .run-status.completed { color: var(--status-ok);   border: 1px solid var(--status-ok); }
+    .run-status.failed    { color: var(--status-err);  border: 1px solid var(--status-err); }
+    .run-status.interrupted { color: var(--text-dim); border: 1px solid var(--border-color); }
+    .run-status.unknown   { color: var(--text-dim);    border: 1px solid var(--border-color); }
+
+    /* --- Modal --- */
+    .modal-backdrop {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+      display: none; justify-content: center; align-items: center;
+      z-index: 12000;
+    }
+    .modal-backdrop.show { display: flex; }
+    .modal {
+      width: min(900px, 92vw); height: min(680px, 88vh);
+      background: var(--bg-panel); border: 1px solid var(--border-color);
+      border-radius: 8px; display: flex; flex-direction: column;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.7);
+    }
+    .modal-header {
+      padding: 12px 16px; border-bottom: 1px solid var(--border-color);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .modal-header h3 {
+      margin: 0; font-family: 'JetBrains Mono', monospace;
+      font-size: 13px; color: var(--text-head);
+    }
+    .modal-tabs { display: flex; gap: 4px; padding: 0 16px; border-bottom: 1px solid var(--border-color); }
+    .modal-tabs button {
+      width: auto; background: transparent; border: none; border-bottom: 2px solid transparent;
+      color: var(--text-dim); padding: 8px 12px; border-radius: 0;
+    }
+    .modal-tabs button.active { color: var(--brand-purple); border-bottom-color: var(--brand-purple); background: transparent; }
+    .modal-body { flex: 1; overflow: auto; padding: 16px; font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+    .modal-footer {
+      padding: 10px 16px; border-top: 1px solid var(--border-color);
+      display: flex; gap: 8px; justify-content: flex-end;
+    }
+    .modal-footer button { width: auto; }
+    button.btn-success { border-color: var(--status-ok); color: var(--status-ok); }
+    button.btn-success:hover { background: rgba(16,185,129,0.1); color: var(--status-ok); }
+    button.btn-danger { border-color: var(--status-err); color: var(--status-err); }
+    button.btn-danger:hover { background: rgba(239,68,68,0.1); color: var(--status-err); }
+
+    pre.transcript, pre.diff-raw {
+      background: var(--bg-input); border: 1px solid var(--border-color);
+      padding: 10px; border-radius: 4px; white-space: pre-wrap; word-break: break-word;
+      color: var(--text-body); margin: 0;
+    }
+    .diff-file-card {
+      border: 1px solid var(--border-color); border-radius: 4px;
+      margin-bottom: 8px; background: var(--bg-input);
+    }
+    .diff-file-card .head {
+      padding: 6px 10px; display: flex; justify-content: space-between;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .diff-file-card .head .path { color: var(--text-head); }
+    .diff-add { color: var(--status-ok); }
+    .diff-del { color: var(--status-err); }
+
+    .guide-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .guide-item {
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background: var(--bg-input);
+      padding: 10px;
+      display: grid;
+      grid-template-columns: 180px 1fr;
+      gap: 10px;
+      align-items: center;
+    }
+    .guide-visual {
+      display: inline-flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+    .guide-chip {
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 10px;
+      text-transform: uppercase;
+      color: var(--text-head);
+      background: var(--bg-panel);
+    }
+    .guide-chip.primary {
+      background: var(--brand-purple);
+      border-color: var(--brand-purple);
+      color: #fff;
+    }
+    .guide-chip.toggle {
+      border-radius: 10px;
+      font-size: 9px;
+      letter-spacing: 0.08em;
+    }
+    .guide-item h4 {
+      margin: 0 0 4px;
+      font-size: 11px;
+      color: var(--text-head);
+    }
+    .guide-item p {
+      margin: 0;
+      color: var(--text-body);
+      line-height: 1.45;
+    }
+    .guide-list {
+      margin: 0;
+      padding-left: 16px;
+      color: var(--text-body);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .mobile-panel-top {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin: -2px -2px 6px;
+      padding: 0 2px;
+    }
+    .mobile-panel-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      color: var(--brand-purple);
+      text-transform: uppercase;
+    }
+    .mobile-close-btn {
+      width: auto;
+      min-width: 34px;
+      padding: 5px 10px;
+    }
+
+    .mobile-drawer-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.62);
+      z-index: 11950;
+    }
+    .mobile-drawer-backdrop.show {
+      display: block;
+    }
+
+    @media (max-width: 960px) {
+      header {
+        padding: 10px 12px;
+        gap: 10px;
+      }
+      .header-left {
+        flex: 1;
+      }
+      #mobile-menu-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .header-actions {
+        gap: 6px;
+      }
+      .header-actions .status-pill {
+        display: none;
+      }
+      .main-content {
+        position: relative;
+      }
+      .control-panel {
+        position: fixed;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        z-index: 12000;
+        width: min(90vw, 460px);
+        min-width: 300px;
+        max-width: 460px;
+        resize: none;
+        transform: translateX(-102%);
+        transition: transform 0.2s ease;
+        border-right: 1px solid var(--border-color);
+        box-shadow: 0 24px 80px rgba(0,0,0,0.65);
+      }
+      .control-panel.mobile-open {
+        transform: translateX(0);
+      }
+      .terminal-container {
+        width: 100%;
+      }
+      .guide-item {
+        grid-template-columns: 1fr;
+      }
+      .mobile-panel-top {
+        display: flex;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-wrapper">
+    <header>
+      <div class="header-left">
+        <button id="mobile-menu-btn" onclick="toggleMobilePanel()" aria-label="Open controls">☰</button>
+        <div class="title-block">
+          <span class="meta-label">LYRN MODULE</span>
+          <h2>Claude Code Control Center</h2>
+        </div>
+      </div>
+      <div class="header-actions">
+        <span class="status-pill" id="auth-pill" title="Backend-reported Claude auth state">
+          <span class="status-dot"></span>
+          <span id="auth-text">Auth ?</span>
+        </span>
+        <span class="status-pill" id="status-pill">
+          <span class="status-dot"></span>
+          <span id="status-text">Idle</span>
+        </span>
+        <button onclick="refreshAuth()">Auth</button>
+        <button onclick="clearTerminal()">Clear</button>
+        <button onclick="connectTerminal()">Reconnect</button>
+        <button class="icon-btn" onclick="openGuideModal()" title="Claude module guide" aria-label="Open module guide">?</button>
+      </div>
+    </header>
+
+    <div class="main-content">
+      <div class="mobile-drawer-backdrop" id="panel-overlay" onclick="closeMobilePanel()"></div>
+      <!-- Control Panel -->
+      <div class="control-panel" id="control-panel">
+        <div class="mobile-panel-top">
+          <span class="mobile-panel-title">Control Panel</span>
+          <button class="mobile-close-btn" onclick="closeMobilePanel()" aria-label="Close controls">✕</button>
+        </div>
+
+        <button class="btn-primary" onclick="launchClaudeCode()">▶ Launch Claude Code</button>
+
+        <!-- Session / Workspace -->
+        <div class="section">
+          <div class="section-header">Workspace</div>
+          <div class="section-body">
+            <div class="input-group">
+              <label>Working Directory (cwd)</label>
+              <input type="text" id="flag-cwd" placeholder="/path/to/repo">
+              <div id="cwd-hint" style="font-size:10px;color:var(--text-dim);font-family:'JetBrains Mono',monospace;min-height:12px;"></div>
+            </div>
+            <div class="input-group">
+              <label>Session Label</label>
+              <input type="text" id="session-label" placeholder="optional name">
+            </div>
+            <div class="toggle-row" style="color: var(--text-dim); font-size: 10px;">
+              <span>Terminal SID</span>
+              <span id="sid-display" style="color: var(--brand-purple);">--</span>
+            </div>
+            <div class="toggle-row" style="color: var(--text-dim); font-size: 10px;">
+              <span>Run ID</span>
+              <span id="run-id-display" style="color: var(--brand-purple);">--</span>
+            </div>
+            <button class="btn-ghost" onclick="newRun()">New Run ID</button>
+          </div>
+        </div>
+
+        <!-- Flags & Config -->
+        <div class="section">
+          <div class="section-header">Launch Flags</div>
+          <div class="section-body">
+            <div class="input-group">
+              <label>Run Mode</label>
+              <select id="flag-mode">
+                <option value="interactive">Interactive</option>
+                <option value="oneshot">One-shot Task</option>
+                <option value="inspect">Read-only Inspect</option>
+                <option value="patch">Patch-only</option>
+              </select>
+            </div>
+
+            <div class="input-group">
+              <label>Model (--model)</label>
+              <select id="flag-model">
+                <option value="">Default</option>
+                <option value="claude-opus-4-6">Claude Opus 4.6</option>
+                <option value="claude-sonnet-4-6">Claude Sonnet 4.6</option>
+                <option value="claude-haiku-4-5-20251001">Claude Haiku 4.5</option>
+                <option value="claude-3-7-sonnet-20250219">Claude 3.7 Sonnet</option>
+                <option value="claude-3-5-sonnet-20241022">Claude 3.5 Sonnet</option>
+                <option value="claude-3-opus-20240229">Claude 3 Opus</option>
+              </select>
+            </div>
+
+            <div class="input-group">
+              <label>Effort Level (--effort)</label>
+              <select id="flag-effort">
+                <option value="">Default</option>
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+                <option value="max">Max</option>
+              </select>
+            </div>
+
+            <div class="input-group">
+              <label>System Prompt (--system-prompt)</label>
+              <input type="text" id="flag-prompt" placeholder="Optional override...">
+            </div>
+
+            <div class="input-group">
+              <label>Task (one-shot)</label>
+              <input type="text" id="flag-task" placeholder="Describe the task...">
+            </div>
+
+            <div class="toggle-row">
+              <span>Auto Mode</span>
+              <label class="toggle-switch">
+                <input type="checkbox" id="flag-auto">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <div class="toggle-row">
+              <span>Skip Permissions</span>
+              <label class="toggle-switch">
+                <input type="checkbox" id="flag-perms">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Command Preview -->
+        <div class="section">
+          <div class="section-header">Command Preview</div>
+          <div class="section-body">
+            <textarea id="cmd-preview" readonly rows="4"
+              style="background: var(--bg-input); border: 1px solid var(--border-color);
+                     color: var(--brand-purple); font-family: 'JetBrains Mono', monospace;
+                     font-size: 11px; padding: 8px; border-radius: 4px; resize: vertical;
+                     width: 100%; outline: none;"></textarea>
+            <button class="btn-ghost" onclick="copyPreview()">Copy</button>
+          </div>
+        </div>
+
+        <!-- Interactive Commands -->
+        <div class="section">
+          <div class="section-header">Interactive Commands</div>
+          <div class="section-body">
+            <div class="cmd-grid">
+              <button onclick="sendToTerminal('/compact')">/compact</button>
+              <button onclick="sendToTerminal('/clear')">/clear</button>
+              <button onclick="sendToTerminal('/cost')">/cost</button>
+              <button onclick="sendToTerminal('/status')">/status</button>
+              <button onclick="sendToTerminal('/doctor')">/doctor</button>
+              <button onclick="sendToTerminal('/insights')">/insights</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Run History -->
+        <div class="section">
+          <div class="section-header">Run History
+            <button onclick="refreshRuns()" style="float:right; width:auto; padding:0 6px; font-size:9px; margin-top:-2px;">↻</button>
+          </div>
+          <div class="section-body">
+            <div class="run-list" id="run-list">
+              <div style="color: var(--text-dim); font-size: 10px; text-align: center;">No runs yet</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Auth & Settings -->
+        <div class="section">
+          <div class="section-header">Auth & Session</div>
+          <div class="section-body">
+            <div class="cmd-grid">
+              <button onclick="sendToTerminal('claude auth login')">Auth Login</button>
+              <button onclick="sendToTerminal('claude auth status')">Auth Status</button>
+            </div>
+            <hr class="divider">
+            <button class="btn-ghost" onclick="sendToTerminal('claude remote-control')">Start Remote Control</button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Terminal View -->
+      <div class="terminal-container">
+        <div id="terminal-wrapper"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Run Detail Modal -->
+  <div class="modal-backdrop" id="run-modal" onclick="if(event.target===this)closeRunModal()">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="run-modal-title">Run</h3>
+        <button onclick="closeRunModal()" style="width:auto;">✕</button>
+      </div>
+      <div class="modal-tabs">
+        <button class="active" id="tab-btn-transcript" onclick="switchModalTab('transcript')">Transcript</button>
+        <button id="tab-btn-diff" onclick="switchModalTab('diff')">Diff</button>
+        <button id="tab-btn-meta" onclick="switchModalTab('meta')">Metadata</button>
+      </div>
+      <div class="modal-body" id="modal-body"></div>
+      <div class="modal-footer">
+        <button onclick="downloadCurrentTranscript()">Export Transcript</button>
+        <button class="btn-danger" onclick="rejectCurrentRun()">Reject (Revert)</button>
+        <button class="btn-success" onclick="approveCurrentRun()">Approve</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Module Guide -->
+  <div class="modal-backdrop" id="guide-modal" onclick="if(event.target===this)closeGuideModal()">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Claude Module User Guide</h3>
+        <button onclick="closeGuideModal()" style="width:auto;">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="guide-grid">
+          <div class="guide-item">
+            <div class="guide-visual">
+              <span class="guide-chip primary">▶ Launch Claude Code</span>
+            </div>
+            <div>
+              <h4>Start command</h4>
+              <p>Runs the command preview with your current options. In interactive mode it sends the command into the terminal. In one-shot/inspect/patch modes it starts a tracked run in Run History.</p>
+            </div>
+          </div>
+
+          <div class="guide-item">
+            <div class="guide-visual">
+              <span class="guide-chip">AUTH</span>
+              <span class="guide-chip">CLEAR</span>
+              <span class="guide-chip">RECONNECT</span>
+              <span class="guide-chip">?</span>
+            </div>
+            <div>
+              <h4>Top-right controls</h4>
+              <p><strong>Auth</strong> refreshes Claude login state, <strong>Clear</strong> wipes visible terminal lines, <strong>Reconnect</strong> reopens the terminal websocket, and <strong>?</strong> opens this guide.</p>
+            </div>
+          </div>
+
+          <div class="guide-item">
+            <div class="guide-visual">
+              <span class="guide-chip">Working Directory</span>
+              <span class="guide-chip">Session Label</span>
+              <span class="guide-chip">New Run ID</span>
+            </div>
+            <div>
+              <h4>Workspace section</h4>
+              <p>Set the repository path, optional label, and rotate to a fresh run ID. The cwd hint validates your path and shows whether it is a git repo.</p>
+            </div>
+          </div>
+
+          <div class="guide-item">
+            <div class="guide-visual">
+              <span class="guide-chip">Run Mode</span>
+              <span class="guide-chip">Model</span>
+              <span class="guide-chip">Effort</span>
+              <span class="guide-chip toggle">AUTO</span>
+              <span class="guide-chip toggle">SKIP PERMS</span>
+            </div>
+            <div>
+              <h4>Launch flags section</h4>
+              <p>Choose execution mode and optional Claude flags. Auto mode and Skip Permissions map directly to their corresponding CLI switches.</p>
+            </div>
+          </div>
+
+          <div class="guide-item">
+            <div class="guide-visual">
+              <span class="guide-chip">Command Preview</span>
+              <span class="guide-chip">Copy</span>
+            </div>
+            <div>
+              <h4>Command preview section</h4>
+              <p>Shows the exact command string created from your current settings. Use Copy to share or inspect before launch.</p>
+            </div>
+          </div>
+
+          <div class="guide-item">
+            <div class="guide-visual">
+              <span class="guide-chip">/compact</span>
+              <span class="guide-chip">/clear</span>
+              <span class="guide-chip">/cost</span>
+              <span class="guide-chip">/status</span>
+              <span class="guide-chip">/doctor</span>
+              <span class="guide-chip">/insights</span>
+            </div>
+            <div>
+              <h4>Interactive commands section</h4>
+              <p>Quick-injects Claude slash commands into the active terminal session so you do not need to type them manually.</p>
+            </div>
+          </div>
+
+          <div class="guide-item">
+            <div class="guide-visual">
+              <span class="guide-chip">↻</span>
+              <span class="guide-chip">Run row</span>
+              <span class="guide-chip">Approve</span>
+              <span class="guide-chip">Reject</span>
+              <span class="guide-chip">Export Transcript</span>
+            </div>
+            <div>
+              <h4>Run history + run detail</h4>
+              <p>Refresh run list with ↻, click any run row to open details, approve accepted changes, reject/revert to baseline, or export transcript for audit.</p>
+            </div>
+          </div>
+
+          <div class="guide-item">
+            <div class="guide-visual">
+              <span class="guide-chip">Auth Login</span>
+              <span class="guide-chip">Auth Status</span>
+              <span class="guide-chip">Start Remote Control</span>
+            </div>
+            <div>
+              <h4>Auth &amp; session section</h4>
+              <p>Runs authentication helpers and remote control command inside the terminal session.</p>
+            </div>
+          </div>
+
+          <div class="guide-item">
+            <div>
+              <h4>Recommended startup order (important)</h4>
+              <ul class="guide-list">
+                <li>Start the model first using normal LYRN controls in the main app.</li>
+                <li>Then open the Claude module.</li>
+                <li>Set workspace/flags, then press <strong>Reconnect</strong> if needed to attach terminal.</li>
+                <li>Finally launch Claude Code with the purple launch button.</li>
+              </ul>
+            </div>
+            <div>
+              <h4>Mobile behavior</h4>
+              <p>On phones/tablets, the left panel becomes a slide-in drawer. Use the top-left ☰ button to open it, then scroll the panel for all controls while terminal remains full-width behind it.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button onclick="closeGuideModal()">Close Guide</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast">Message</div>
+
+  <script>
+    // =====================================================================
+    // Claude Code Control Center
+    // ---------------------------------------------------------------------
+    //  - Interactive mode  -> live terminal websocket (/api/terminal/{sid})
+    //  - Non-interactive   -> orchestrated runs (/api/claude/runs)
+    //  - Backend is the source of truth for the actual command (argv).
+    //    The frontend preview is informational only.
+    //  - Polling is centralized in pollOnce() so it is easy to replace.
+    // =====================================================================
+
+    // ---- Connection state ----
+    let authToken = localStorage.getItem('lyrn_admin_token') || null;
+    let coreUrl   = localStorage.getItem('lyrn_core_url') || '';
+    const MOBILE_BREAKPOINT = 960;
+
+    // ---- Terminal state ----
+    let term = null;
+    let fitAddon = null;
+    let socket = null;
+    // Terminal SID stays stable across reconnects of the same pty.
+    // Run ID is informational and rotates on each launch.
+    const sid = 'term_' + Math.random().toString(36).substr(2, 9);
+    let runId = newRunIdValue();
+    let lastSysMsg = null; // dedupe consecutive [sys] lines
+
+    function newRunIdValue() {
+      return 'run_' + Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 4);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initTerminal();
+      document.getElementById('sid-display').innerText = sid;
+      document.getElementById('run-id-display').innerText = runId;
+
+      // Live-update preview as flags change.
+      ['flag-mode','flag-model','flag-effort','flag-prompt','flag-task',
+       'flag-auto','flag-perms','flag-cwd']
+        .forEach(id => {
+          const el = document.getElementById(id);
+          if (!el) return;
+          el.addEventListener('input',  updatePreview);
+          el.addEventListener('change', updatePreview);
+        });
+      updatePreview();
+
+      // Debounced live cwd validation hint.
+      const cwdInput = document.getElementById('flag-cwd');
+      let cwdTimer = null;
+      if (cwdInput) {
+        cwdInput.addEventListener('input', () => {
+          clearTimeout(cwdTimer);
+          setCwdHint('checking...', 'dim');
+          cwdTimer = setTimeout(() => {
+            const v = cwdInput.value.trim();
+            if (!v) { setCwdHint('', 'dim'); return; }
+            validateCwd(v);
+          }, 350);
+        });
+      }
+
+      // Try connecting immediately if we have config from localStorage
+      if (coreUrl) connectTerminal();
+      else setStatus('idle', 'Waiting for config');
+      if (coreUrl && authToken) startPolling();
+
+      window.addEventListener('message', (event) => {
+        const d = event.data || {};
+        if (d.type === 'THEME_CHANGE') {
+          document.body.setAttribute('data-theme', d.theme);
+        }
+        if (d.type === 'FONT_CHANGE') {
+          document.documentElement.style.setProperty('--font-size-base', d.fontSize + 'px');
+          if (term) {
+            try { term.options.fontSize = parseInt(d.fontSize, 10) || 13; fitAddon && fitAddon.fit(); } catch(e){}
+          }
+        }
+        if (d.type === 'TOKEN_UPDATE') {
+          authToken = d.token;
+          connectTerminal();
+          startPolling();
+        }
+        if (d.type === 'CORE_URL_CHANGE') {
+          coreUrl = d.url;
+          connectTerminal();
+          startPolling();
+        }
+      });
+
+      window.addEventListener('resize', () => {
+        if (fitAddon) { try { fitAddon.fit(); } catch(e){} }
+        if (window.innerWidth > MOBILE_BREAKPOINT) closeMobilePanel();
+      });
+    });
+
+    // ---- UI helpers ----
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.innerText = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    function toggleMobilePanel() {
+      const panel = document.getElementById('control-panel');
+      const backdrop = document.getElementById('panel-overlay');
+      if (!panel || !backdrop) return;
+      const next = !panel.classList.contains('mobile-open');
+      panel.classList.toggle('mobile-open', next);
+      backdrop.classList.toggle('show', next);
+    }
+
+    function closeMobilePanel() {
+      const panel = document.getElementById('control-panel');
+      const backdrop = document.getElementById('panel-overlay');
+      if (!panel || !backdrop) return;
+      panel.classList.remove('mobile-open');
+      backdrop.classList.remove('show');
+    }
+
+    function openGuideModal() {
+      const modal = document.getElementById('guide-modal');
+      if (modal) modal.classList.add('show');
+      closeMobilePanel();
+    }
+
+    function closeGuideModal() {
+      const modal = document.getElementById('guide-modal');
+      if (modal) modal.classList.remove('show');
+    }
+
+    function sysMsg(color, text) {
+      // Quiet duplicate system noise (e.g. repeated Disconnected lines).
+      if (lastSysMsg === text) return;
+      lastSysMsg = text;
+      if (term) term.writeln(`\r\n\x1b[2m[sys]\x1b[0m \x1b[${color}m${text}\x1b[0m`);
+    }
+
+    function newRun() {
+      runId = newRunIdValue();
+      document.getElementById('run-id-display').innerText = runId;
+      updatePreview();
+    }
+
+    function shellQuote(s) {
+      // POSIX-safe single-quote wrapping; handles backticks, $, newlines, etc.
+      return "'" + String(s).replace(/'/g, "'\\''") + "'";
+    }
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+
+    function setStatus(state, label) {
+      const pill = document.getElementById('status-pill');
+      pill.classList.remove('connected', 'connecting', 'error');
+      if (['connected','connecting','error'].includes(state)) pill.classList.add(state);
+      document.getElementById('status-text').innerText = label;
+    }
+
+    function setCwdHint(text, kind) {
+      const el = document.getElementById('cwd-hint');
+      if (!el) return;
+      el.innerText = text || '';
+      el.style.color = kind === 'ok'  ? 'var(--status-ok)'
+                     : kind === 'err' ? 'var(--status-err)'
+                                      : 'var(--text-dim)';
+    }
+
+    // ---- Terminal ----
+    function initTerminal() {
+      const container = document.getElementById('terminal-wrapper');
+      term = new Terminal({
+        cursorBlink: true,
+        theme: { background: '#000000', foreground: '#ffffff', cursor: '#7c5cff' },
+        fontFamily: '"JetBrains Mono", monospace',
+        fontSize: 13,
+        allowProposedApi: true,
+      });
+      fitAddon = new FitAddon.FitAddon();
+      term.loadAddon(fitAddon);
+      term.open(container);
+
+      term.onData(data => {
+        if (socket && socket.readyState === WebSocket.OPEN) {
+          socket.send(JSON.stringify({ type: 'input', data }));
+        }
+      });
+      term.onResize(size => {
+        if (socket && socket.readyState === WebSocket.OPEN) {
+          socket.send(JSON.stringify({ type: 'resize', cols: size.cols, rows: size.rows }));
+        }
+      });
+      setTimeout(() => { try { fitAddon.fit(); } catch(e){} }, 100);
+    }
+
+    function clearTerminal() { if (term) term.clear(); }
+
+    async function connectTerminal() {
+      // Tear down any existing socket cleanly first.
+      if (socket) {
+        try {
+          socket.onclose = null;
+          socket.onerror = null;
+          socket.close();
+        } catch (e) {}
+        socket = null;
+      }
+
+      if (!coreUrl) {
+        sysMsg('31', 'Core URL not set. Waiting for configuration...');
+        setStatus('error', 'No Core URL');
+        return;
+      }
+
+      // If a cwd is set, validate it before opening the websocket so we
+      // surface a clean error in the UI rather than silently falling back.
+      const cwd = (document.getElementById('flag-cwd').value || '').trim();
+      if (cwd) {
+        const v = await validateCwd(cwd, /*silent*/ true);
+        if (!v.ok) {
+          sysMsg('31', 'Invalid cwd: ' + v.error);
+          setStatus('error', 'Bad cwd');
+          return;
+        }
+      }
+
+      let wsUrl = coreUrl.replace(/^http/, 'ws') + `/api/terminal/${sid}`;
+      const params = new URLSearchParams();
+      if (authToken) params.set('token', authToken);
+      if (cwd)       params.set('cwd', cwd);
+      const qs = params.toString();
+      if (qs) wsUrl += '?' + qs;
+
+      sysMsg('36', 'Connecting to terminal...');
+      setStatus('connecting', 'Connecting');
+
+      try {
+        socket = new WebSocket(wsUrl);
+      } catch (e) {
+        sysMsg('31', 'Failed to open WebSocket.');
+        setStatus('error', 'Error');
+        return;
+      }
+
+      socket.onopen = () => {
+        lastSysMsg = null;
+        sysMsg('32', 'Connected.');
+        setStatus('connected', 'Connected');
+        setTimeout(() => { try { fitAddon.fit(); } catch(e){} }, 100);
+      };
+      socket.onmessage = (event) => {
+        try {
+          const msg = JSON.parse(event.data);
+          if (msg.type === 'output') term.write(msg.data);
+        } catch (e) {
+          console.error('Failed to parse WS msg', e);
+        }
+      };
+      socket.onclose = () => {
+        sysMsg('31', 'Disconnected.');
+        setStatus('error', 'Disconnected');
+      };
+      socket.onerror = () => {
+        sysMsg('31', 'WebSocket error.');
+        setStatus('error', 'Error');
+      };
+    }
+
+    // ---- Command preview (informational; backend builds the real argv) ----
+    function copyPreview() {
+      const ta = document.getElementById('cmd-preview');
+      ta.select();
+      try { document.execCommand('copy'); showToast('Copied'); }
+      catch (e) { showToast('Copy failed'); }
+    }
+
+    function readPayload() {
+      return {
+        mode:          document.getElementById('flag-mode').value,
+        cwd:           document.getElementById('flag-cwd').value || '',
+        model:         document.getElementById('flag-model').value || '',
+        effort:        document.getElementById('flag-effort').value || '',
+        system_prompt: document.getElementById('flag-prompt').value || '',
+        task:          document.getElementById('flag-task').value || '',
+        label:         document.getElementById('session-label').value || '',
+        auto:          document.getElementById('flag-auto').checked,
+        perms:         document.getElementById('flag-perms').checked,
+      };
+    }
+
+    function buildLaunchCommand() {
+      const p = readPayload();
+      const parts = ['claude'];
+      if (p.mode === 'oneshot') parts.push('--print');
+      else if (p.mode === 'inspect') parts.push('--read-only');
+      else if (p.mode === 'patch') parts.push('--patch-only');
+      if (p.model)         parts.push('--model', p.model);
+      if (p.effort)        parts.push('--effort', p.effort);
+      if (p.system_prompt) parts.push('--system-prompt', shellQuote(p.system_prompt));
+      if (p.auto)          parts.push('--enable-auto-mode');
+      if (p.perms)         parts.push('--dangerously-skip-permissions');
+      if (p.mode !== 'interactive' && p.task) parts.push(shellQuote(p.task));
+      return parts.join(' ');
+    }
+
+    function updatePreview() {
+      const ta = document.getElementById('cmd-preview');
+      if (ta) ta.value = buildLaunchCommand();
+    }
+
+    // ---- Send to live terminal (interactive mode) ----
+    function sendToTerminal(cmdStr) {
+      if (!socket || socket.readyState !== WebSocket.OPEN) {
+        showToast('Terminal not connected');
+        return;
+      }
+      socket.send(JSON.stringify({ type: 'input', data: cmdStr + '\r\n' }));
+      term.focus();
+    }
+    // Backwards-compatible alias for any external callers.
+    const injectCmd = sendToTerminal;
+
+    async function launchClaudeCode() {
+      newRun();
+      const payload = readPayload();
+      // Pre-flight cwd validation for both paths so failures are visible.
+      const v = await validateCwd(payload.cwd);
+      if (!v.ok) {
+        showToast('Invalid cwd: ' + v.error);
+        return;
+      }
+      if (payload.mode === 'interactive') {
+        sendToTerminal(buildLaunchCommand());
+      } else {
+        startOrchestratedRun(payload);
+      }
+    }
+
+    // ========== Orchestrator API ==========
+    async function api(path, opts = {}) {
+      if (!coreUrl) throw new Error('Core URL not set');
+      let r;
+      try {
+        r = await fetch(coreUrl + path, {
+          ...opts,
+          headers: {
+            'Content-Type': 'application/json',
+            ...(authToken ? { 'X-Token': authToken } : {}),
+            ...(opts.headers || {}),
+          },
+        });
+      } catch (e) {
+        throw new Error('Network error: ' + e.message);
+      }
+      if (!r.ok) {
+        // Try to extract a JSON detail message; fall back to status text.
+        let msg = `HTTP ${r.status}`;
+        try {
+          const j = await r.json();
+          if (j && (j.detail || j.message)) msg += ' — ' + (j.detail || j.message);
+        } catch (e) {}
+        throw new Error(msg);
+      }
+      return r.json();
+    }
+
+    // Pre-flight cwd validation. When ``silent`` is true, the cwd hint is
+    // not updated (used by the terminal reconnect path which has its own
+    // surfacing in the terminal itself).
+    async function validateCwd(cwd, silent) {
+      const value = (cwd || '').trim();
+      if (!value) {
+        if (!silent) setCwdHint('cwd is required', 'err');
+        return { ok: false, error: 'cwd is required' };
+      }
+      try {
+        const r = await api('/api/claude/validate_cwd', {
+          method: 'POST',
+          body: JSON.stringify({ cwd: value }),
+        });
+        if (r.ok) {
+          if (!silent) setCwdHint(`✓ ${r.path}${r.is_git_repo ? ' · git' : ''}`, 'ok');
+          return r;
+        }
+        if (!silent) setCwdHint(r.error || 'invalid', 'err');
+        return { ok: false, error: r.error || 'invalid' };
+      } catch (e) {
+        if (!silent) setCwdHint(e.message, 'err');
+        return { ok: false, error: e.message };
+      }
+    }
+
+    async function refreshAuth() {
+      const pill = document.getElementById('auth-pill');
+      const txt  = document.getElementById('auth-text');
+      pill.classList.remove('connected', 'connecting', 'error');
+      try {
+        const data = await api('/api/claude/auth');
+        if (!data.available)         { pill.classList.add('error');     txt.innerText = 'No CLI'; }
+        else if (data.authenticated) { pill.classList.add('connected'); txt.innerText = 'Authed'; }
+        else                         { pill.classList.add('error');     txt.innerText = 'Logged out'; }
+      } catch (e) {
+        pill.classList.add('error');
+        txt.innerText = 'Auth ?';
+      }
+    }
+
+    function renderRunRow(r) {
+      const ts = r.started_at ? new Date(r.started_at * 1000).toLocaleTimeString() : '';
+      const label = r.label || r.id;
+      const statusCls = ['running','completed','failed','interrupted'].includes(r.status) ? r.status : 'unknown';
+      const tags = [
+        r.mode,
+        ts,
+        r.has_diff ? 'diff' : '',
+        r.approved === true ? '✓ approved' : '',
+        r.approved === false ? '✗ reverted' : '',
+      ].filter(Boolean).join(' · ');
+      return `<div class="run-item" data-run-id="${r.id}" onclick="openRunModal('${r.id}')">
+        <div class="row">
+          <span class="label">${escapeHtml(label)}</span>
+          <span class="run-status ${statusCls}">${escapeHtml(r.status)}</span>
+        </div>
+        <div class="meta">${escapeHtml(tags)}</div>
+      </div>`;
+    }
+
+    let lastRunSignature = '';
+    async function refreshRuns() {
+      const list = document.getElementById('run-list');
+      try {
+        const data = await api('/api/claude/runs');
+        const runs = data.runs || [];
+        // Cheap diff: only re-render when the visible signature changes.
+        const sig = JSON.stringify(runs.map(r => [r.id, r.status, r.approved, r.has_diff]));
+        if (sig === lastRunSignature) return runs;
+        lastRunSignature = sig;
+        list.innerHTML = runs.length
+          ? runs.map(renderRunRow).join('')
+          : '<div style="color:var(--text-dim);font-size:10px;text-align:center;">No runs yet</div>';
+        return runs;
+      } catch (e) {
+        list.innerHTML = `<div style="color:var(--status-err);font-size:10px;">${escapeHtml(e.message)}</div>`;
+        return [];
+      }
+    }
+
+    async function startOrchestratedRun(payload) {
+      try {
+        const data = await api('/api/claude/runs', {
+          method: 'POST',
+          body: JSON.stringify(payload),
+        });
+        if (!data.success) {
+          showToast('Run failed: ' + (data.message || 'unknown'));
+          return;
+        }
+        showToast('Run started');
+        // Force an immediate poll cycle so the new run appears.
+        lastRunSignature = '';
+        const runs = await refreshRuns();
+        // Auto-open the new run for convenience.
+        if (data.run && data.run.id) openRunModal(data.run.id);
+        else if (runs.length) openRunModal(runs[0].id);
+      } catch (e) {
+        showToast('Run start error: ' + e.message);
+      }
+    }
+
+    // ---- Modal ----
+    let currentRunId = null;
+    let currentRunStatus = null;
+    let modalTab = 'transcript';
+
+    function openRunModal(runId) {
+      currentRunId = runId;
+      currentRunStatus = null;
+      modalTab = 'transcript';
+      document.getElementById('run-modal-title').innerText = 'Run ' + runId;
+      document.getElementById('run-modal').classList.add('show');
+      switchModalTab('transcript');
+    }
+
+    function closeRunModal() {
+      document.getElementById('run-modal').classList.remove('show');
+      currentRunId = null;
+      currentRunStatus = null;
+    }
+
+    function switchModalTab(tab) {
+      modalTab = tab;
+      ['transcript','diff','meta'].forEach(t => {
+        const btn = document.getElementById('tab-btn-' + t);
+        if (btn) btn.classList.toggle('active', t === tab);
+      });
+      renderModalBody();
+    }
+
+    function modalLoading(body) {
+      body.innerHTML = '<div style="color:var(--text-dim)">Loading...</div>';
+    }
+
+    function modalError(body, msg) {
+      body.innerHTML = `<div style="color:var(--status-err);">${escapeHtml(msg)}</div>`;
+    }
+
+    async function renderModalBody() {
+      const body = document.getElementById('modal-body');
+      if (!currentRunId) { body.innerHTML = ''; return; }
+      modalLoading(body);
+      try {
+        // Always pull the latest run record so currentRunStatus stays in sync.
+        const run = await api(`/api/claude/runs/${currentRunId}`);
+        currentRunStatus = run.status;
+
+        if (modalTab === 'transcript') {
+          const data = await api(`/api/claude/runs/${currentRunId}/transcript`);
+          const text = data.transcript || '(empty)';
+          body.innerHTML = `<pre class="transcript">${escapeHtml(text)}</pre>`;
+        } else if (modalTab === 'diff') {
+          const data = await api(`/api/claude/runs/${currentRunId}/diff`);
+          if (data.error) {
+            body.innerHTML = `<div style="color:var(--text-dim)">No diff: ${escapeHtml(data.error)}</div>`;
+            return;
+          }
+          if (!data.files || !data.files.length) {
+            body.innerHTML = '<div style="color:var(--text-dim)">No file changes detected.</div>';
+            return;
+          }
+          const cards = data.files.map(f => `
+            <div class="diff-file-card">
+              <div class="head">
+                <span class="path">${escapeHtml(f.path)}</span>
+                <span><span class="diff-add">+${f.additions}</span> <span class="diff-del">-${f.deletions}</span></span>
+              </div>
+            </div>`).join('');
+          const raw = `<details style="margin-top:10px;">
+            <summary style="cursor:pointer;color:var(--text-dim);">Raw patch</summary>
+            <pre class="diff-raw" style="margin-top:6px;">${escapeHtml(data.raw || '')}</pre>
+          </details>`;
+          body.innerHTML = cards + raw;
+        } else if (modalTab === 'meta') {
+          body.innerHTML = `<pre class="transcript">${escapeHtml(JSON.stringify(run, null, 2))}</pre>`;
+        }
+      } catch (e) {
+        modalError(body, e.message);
+      }
+    }
+
+    async function approveCurrentRun() {
+      if (!currentRunId) return;
+      try {
+        const r = await api(`/api/claude/runs/${currentRunId}/approve`, { method: 'POST' });
+        showToast(r.success ? 'Approved' : ('Approve failed: ' + (r.message || '')));
+        lastRunSignature = '';
+        await refreshRuns();
+        await renderModalBody();
+      } catch (e) { showToast('Error: ' + e.message); }
+    }
+
+    async function rejectCurrentRun() {
+      if (!currentRunId) return;
+      if (!confirm('Revert working tree to the baseline snapshot? This is destructive.')) return;
+      try {
+        const r = await api(`/api/claude/runs/${currentRunId}/reject`, { method: 'POST' });
+        showToast(r.success ? 'Reverted to baseline' : ('Revert failed: ' + (r.message || '')));
+        lastRunSignature = '';
+        await refreshRuns();
+        await renderModalBody();
+      } catch (e) { showToast('Error: ' + e.message); }
+    }
+
+    function downloadCurrentTranscript() {
+      if (!currentRunId || !coreUrl) return;
+      const qs = authToken ? '?token=' + encodeURIComponent(authToken) : '';
+      const url = `${coreUrl}/api/claude/runs/${currentRunId}/transcript/download${qs}`;
+      window.open(url, '_blank');
+    }
+
+    // ---- Polling (centralized; intentionally simple, easy to replace) ----
+    let pollTimer = null;
+    const POLL_INTERVAL_MS = 4000;
+
+    async function pollOnce() {
+      const runs = await refreshRuns();
+      // If the modal is open on a still-running run, refresh its body so
+      // transcript/diff stay in sync without requiring a manual reload.
+      if (currentRunId) {
+        const cur = runs && runs.find(r => r.id === currentRunId);
+        if (cur && cur.status !== currentRunStatus) {
+          await renderModalBody();
+        }
+      }
+    }
+
+    function startPolling() {
+      if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+      if (!coreUrl || !authToken) return;
+      refreshAuth();
+      pollOnce();
+      pollTimer = setInterval(pollOnce, POLL_INTERVAL_MS);
+    }
+  </script>
+</body>
+</html>

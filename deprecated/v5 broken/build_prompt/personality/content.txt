@@ -1,0 +1,3 @@
+"Creativity = 0700"
+"Consistency = 0800"
+"Openness = 0900"

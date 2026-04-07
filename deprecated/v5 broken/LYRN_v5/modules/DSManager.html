@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Snapshot Manager</title>
+    <style>
+        :root {
+            --bg-color: #1e1e1e;
+            --container-bg: #2d2d2d;
+            --text-color: #e0e0e0;
+            --border-color: #444;
+            --primary-color: #4CAF50;
+            --primary-hover: #45a049;
+            --danger-color: #f44336;
+            --danger-hover: #d32f2f;
+            --active-color: #2196F3;
+            --inactive-color: #757575;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 10px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        h2 { margin-top: 0; font-size: 1.2rem; }
+
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 10px;
+        }
+
+        .tab {
+            padding: 8px 16px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            border-bottom: none;
+            border-radius: 4px 4px 0 0;
+            background: var(--container-bg);
+            color: var(--text-color);
+            margin-right: 2px;
+            opacity: 0.7;
+        }
+
+        .tab.active {
+            opacity: 1;
+            background: #3d3d3d;
+            border-color: var(--border-color);
+            border-bottom-color: #3d3d3d;
+        }
+
+        .tab-content {
+            display: none;
+            flex: 1;
+            overflow-y: auto;
+            background: #3d3d3d;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-top: none;
+        }
+
+        .tab-content.active { display: flex; flex-direction: column; }
+
+        .snapshot-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .snapshot-item {
+            background: var(--container-bg);
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .snapshot-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .snapshot-name { font-weight: bold; }
+
+        .snapshot-status {
+            padding: 2px 6px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            color: #fff;
+        }
+        .status-active { background-color: var(--active-color); }
+        .status-inactive { background-color: var(--inactive-color); }
+
+        .snapshot-content {
+            background: #1e1e1e;
+            padding: 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.9em;
+            white-space: pre-wrap;
+            max-height: 100px;
+            overflow-y: auto;
+            border: 1px solid #000;
+        }
+
+        .actions {
+            display: flex;
+            gap: 5px;
+            margin-top: 5px;
+        }
+
+        button {
+            background: var(--container-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+        button:hover { background: #444; }
+
+        .btn-toggle.active { background: var(--active-color); border-color: var(--active-color); }
+        .btn-delete:hover { background: var(--danger-color); border-color: var(--danger-color); }
+
+        .empty-state {
+            text-align: center;
+            color: #888;
+            padding: 20px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <h2>Dynamic Snapshots</h2>
+
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab('jobs')">Job Instructions</div>
+        <div class="tab" onclick="switchTab('projects')">Projects</div>
+    </div>
+
+    <div id="jobs-tab" class="tab-content active">
+        <ul id="jobs-list" class="snapshot-list">
+            <div class="empty-state">Loading...</div>
+        </ul>
+    </div>
+
+    <div id="projects-tab" class="tab-content">
+        <ul id="projects-list" class="snapshot-list">
+            <div class="empty-state">Loading...</div>
+        </ul>
+    </div>
+
+    <script>
+        let baseUrl = window.location.origin;
+        let authToken = null;
+        let currentTab = 'jobs';
+
+        // Wait for token from parent
+        window.addEventListener('message', function(event) {
+            if (event.data.type === 'TOKEN_UPDATE') {
+                authToken = event.data.token;
+                loadSnapshots(currentTab);
+            }
+        });
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+            event.target.classList.add('active');
+            document.getElementById(`${tabId}-tab`).classList.add('active');
+
+            currentTab = tabId;
+            loadSnapshots(tabId);
+        }
+
+        async function loadSnapshots(category) {
+            if (!authToken) return;
+
+            const listEl = document.getElementById(`${category}-list`);
+            listEl.innerHTML = '<div class="empty-state">Loading...</div>';
+
+            try {
+                const response = await fetch(`${baseUrl}/api/dsmanager/${category}`, {
+                    headers: { 'X-Token': authToken }
+                });
+
+                if (!response.ok) throw new Error('Failed to fetch');
+                const snapshots = await response.json();
+
+                if (snapshots.length === 0) {
+                    listEl.innerHTML = '<div class="empty-state">No dynamic snapshots found.</div>';
+                    return;
+                }
+
+                listEl.innerHTML = '';
+                snapshots.forEach(snap => {
+                    const li = document.createElement('li');
+                    li.className = 'snapshot-item';
+
+                    const statusClass = snap.active ? 'status-active' : 'status-inactive';
+                    const statusText = snap.active ? 'Active' : 'Inactive';
+
+                    li.innerHTML = `
+                        <div class="snapshot-header">
+                            <span class="snapshot-name">${snap.name}</span>
+                            <span class="snapshot-status ${statusClass}">${statusText}</span>
+                        </div>
+                        <div class="snapshot-content">${escapeHtml(snap.content || 'No content')}</div>
+                        <div class="actions">
+                            <button class="btn-toggle ${snap.active ? 'active' : ''}"
+                                onclick="toggleActive('${category}', '${snap.name}', ${!snap.active})">
+                                ${snap.active ? 'Deactivate' : 'Activate'}
+                            </button>
+                            <button class="btn-delete" onclick="deleteSnapshot('${category}', '${snap.name}')">Delete</button>
+                        </div>
+                    `;
+                    listEl.appendChild(li);
+                });
+            } catch (error) {
+                listEl.innerHTML = `<div class="empty-state">Error: ${error.message}</div>`;
+            }
+        }
+
+        async function toggleActive(category, name, newState) {
+            try {
+                const response = await fetch(`${baseUrl}/api/dsmanager/${category}/${name}/active`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Token': authToken
+                    },
+                    body: JSON.stringify({ active: newState })
+                });
+
+                if (response.ok) {
+                    loadSnapshots(category);
+                } else {
+                    alert('Failed to update status');
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Error updating status');
+            }
+        }
+
+        async function deleteSnapshot(category, name) {
+            if (!confirm(`Are you sure you want to delete ${name}?`)) return;
+
+            try {
+                const response = await fetch(`${baseUrl}/api/dsmanager/${category}/${name}`, {
+                    method: 'DELETE',
+                    headers: { 'X-Token': authToken }
+                });
+
+                if (response.ok) {
+                    loadSnapshots(category);
+                } else {
+                    alert('Failed to delete snapshot');
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Error deleting snapshot');
+            }
+        }
+
+        function escapeHtml(unsafe) {
+            return unsafe
+                 .replace(/&/g, "&amp;")
+                 .replace(/</g, "&lt;")
+                 .replace(/>/g, "&gt;")
+                 .replace(/"/g, "&quot;")
+                 .replace(/'/g, "&#039;");
+        }
+
+        // Setup periodic refresh
+        setInterval(() => {
+            if (authToken && document.visibilityState === 'visible') {
+                loadSnapshots(currentTab);
+            }
+        }, 5000);
+    </script>
+</body>
+</html>

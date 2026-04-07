@@ -1,0 +1,6 @@
+{
+  "begin_bracket": "###CORE_IDENTITY_START###",
+  "end_bracket": "###CORE_IDENTITY_END###",
+  "rwi_text": "Foundational identity, philosophy, and purpose.",
+  "content_file": "content.txt"
+}

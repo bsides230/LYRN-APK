@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Output Viewer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <style>
+        :root {
+            --bg-core:          #050505;
+            --bg-panel:         #0a0a0a;
+            --bg-block:         #0f0f0f;
+            --brand-purple:     #7c5cff;
+            --brand-purple-dim: rgba(124,92,255,0.12);
+            --text-head:        #ffffff;
+            --text-body:        #b0b0b0;
+            --text-dim:         #444444;
+            --text-internal:    #555555;
+            --border-color:     #1e1e1e;
+            --marker-color:     #f59e0b;
+            --marker-bg:        rgba(245,158,11,0.08);
+            --live-dot:         #10b981;
+            --idle-dot:         #444444;
+            --user-bubble:      rgba(124,92,255,0.10);
+            --asst-bubble:      #0d0d0d;
+        }
+        body[data-theme="light"] {
+            --bg-core:          #eef0f4;
+            --bg-panel:         #ffffff;
+            --bg-block:         #f5f5f7;
+            --brand-purple:     #6a4ce0;
+            --brand-purple-dim: rgba(106,76,224,0.1);
+            --text-head:        #111111;
+            --text-body:        #333333;
+            --text-dim:         #aaaaaa;
+            --text-internal:    #888888;
+            --border-color:     #d1d5db;
+            --marker-color:     #d97706;
+            --marker-bg:        rgba(217,119,6,0.08);
+            --user-bubble:      rgba(106,76,224,0.09);
+            --asst-bubble:      #f0f0f3;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--brand-purple); }
+
+        body {
+            background: var(--bg-core);
+            color: var(--text-body);
+            font-family: 'Inter', sans-serif;
+            font-size: 12px;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* ── Header ── */
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px 8px;
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+        .header-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            color: var(--text-head);
+            flex: 1;
+        }
+        .status-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: var(--idle-dot);
+            transition: background 0.3s;
+        }
+        .status-dot.live { background: var(--live-dot); box-shadow: 0 0 6px var(--live-dot); }
+        .status-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            color: var(--text-dim);
+            letter-spacing: 0.08em;
+        }
+        .btn-sm {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-body);
+            padding: 3px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            font-family: 'Inter', sans-serif;
+            transition: border-color 0.15s, color 0.15s;
+        }
+        .btn-sm:hover { border-color: var(--brand-purple); color: var(--text-head); }
+
+        /* ── Tabs ── */
+        .tabs {
+            display: flex;
+            gap: 2px;
+            padding: 8px 16px 0;
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+        .tab {
+            padding: 5px 12px;
+            cursor: pointer;
+            font-size: 11px;
+            color: var(--text-dim);
+            border-bottom: 2px solid transparent;
+            transition: color 0.15s, border-color 0.15s;
+            user-select: none;
+        }
+        .tab.active { color: var(--brand-purple); border-bottom-color: var(--brand-purple); }
+        .tab:hover:not(.active) { color: var(--text-body); }
+
+        /* ── Panels ── */
+        .panel { flex: 1; overflow: hidden; display: none; }
+        .panel.active { display: flex; flex-direction: column; }
+
+        /* ── Live Panel ── */
+        .live-meta {
+            padding: 10px 16px 6px;
+            font-size: 11px;
+            color: var(--text-dim);
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+            min-height: 28px;
+        }
+        .live-meta .user-msg { color: var(--text-body); }
+        .live-output {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px 16px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            line-height: 1.7;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        /* pre-marker text — internal reasoning */
+        .chunk-internal { color: var(--text-internal); }
+        /* <think> block visual distinction */
+        .chunk-thinking {
+            color: var(--text-internal);
+            opacity: 0.6;
+            font-style: italic;
+        }
+        /* the marker line itself */
+        .marker-line {
+            display: block;
+            color: var(--marker-color);
+            background: var(--marker-bg);
+            padding: 2px 6px;
+            border-radius: 3px;
+            margin: 4px 0;
+            font-weight: 500;
+        }
+        /* post-marker text — what the user sees */
+        .chunk-final { color: var(--text-body); }
+
+        /* ── History Panel ── */
+        .history-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px 0;
+        }
+        .history-card {
+            border-bottom: 1px solid var(--border-color);
+            padding: 10px 16px;
+            cursor: pointer;
+            transition: background 0.12s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .history-card:hover { background: var(--brand-purple-dim); }
+        .h-time {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            color: var(--text-dim);
+            flex-shrink: 0;
+            width: 66px;
+        }
+        .h-user {
+            flex: 1;
+            font-size: 11px;
+            color: var(--text-head);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .h-arrow {
+            font-size: 10px;
+            color: var(--text-dim);
+            flex-shrink: 0;
+        }
+        .empty-state {
+            color: var(--text-dim);
+            text-align: center;
+            padding: 40px 16px;
+            font-size: 11px;
+        }
+
+        /* ── Chat Viewer Widget Overlay ── */
+        .viewer-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.72);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+        .viewer-overlay.open { display: flex; }
+
+        .viewer-widget {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            width: min(720px, 92vw);
+            height: min(580px, 88vh);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+        }
+
+        /* Widget header */
+        .widget-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+        .widget-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--text-dim);
+            flex: 1;
+            letter-spacing: 0.06em;
+        }
+        .widget-close {
+            background: transparent;
+            border: none;
+            color: var(--text-dim);
+            font-size: 16px;
+            cursor: pointer;
+            line-height: 1;
+            padding: 2px 4px;
+            border-radius: 3px;
+            transition: color 0.12s, background 0.12s;
+        }
+        .widget-close:hover { color: var(--text-head); background: var(--brand-purple-dim); }
+
+        /* Chat pair content */
+        .widget-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .chat-pair-user {
+            align-self: flex-end;
+            max-width: 85%;
+            background: var(--user-bubble);
+            border: 1px solid rgba(124,92,255,0.18);
+            border-radius: 10px 10px 2px 10px;
+            padding: 10px 14px;
+        }
+        .chat-pair-user .pair-role {
+            font-size: 9px;
+            letter-spacing: 0.1em;
+            color: var(--brand-purple);
+            margin-bottom: 4px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .chat-pair-asst {
+            align-self: flex-start;
+            max-width: 90%;
+            background: var(--asst-bubble);
+            border: 1px solid var(--border-color);
+            border-radius: 2px 10px 10px 10px;
+            padding: 10px 14px;
+        }
+        .chat-pair-asst .pair-role {
+            font-size: 9px;
+            letter-spacing: 0.1em;
+            color: var(--text-dim);
+            margin-bottom: 4px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .pair-text {
+            font-size: 12px;
+            line-height: 1.65;
+            white-space: pre-wrap;
+            word-break: break-word;
+            color: var(--text-body);
+        }
+
+        /* Widget bottom nav bar */
+        .widget-nav {
+            display: flex;
+            align-items: center;
+            padding: 0 14px;
+            height: 40px;
+            border-top: 1px solid var(--border-color);
+            flex-shrink: 0;
+            gap: 8px;
+        }
+        .nav-arrow {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-body);
+            width: 28px; height: 26px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            display: flex; align-items: center; justify-content: center;
+            transition: border-color 0.12s, color 0.12s;
+            flex-shrink: 0;
+        }
+        .nav-arrow:hover { border-color: var(--brand-purple); color: var(--text-head); }
+        .nav-arrow:disabled { opacity: 0.3; cursor: default; }
+        .nav-arrow:disabled:hover { border-color: var(--border-color); color: var(--text-body); }
+
+        /* Timestamp button (center of nav) */
+        .nav-ts-wrap {
+            flex: 1;
+            position: relative;
+            display: flex;
+            justify-content: center;
+        }
+        .nav-ts-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-body);
+            padding: 3px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 0.05em;
+            transition: border-color 0.12s;
+            white-space: nowrap;
+        }
+        .nav-ts-btn:hover { border-color: var(--brand-purple); }
+
+        /* Timestamp dropdown */
+        .nav-ts-dropdown {
+            display: none;
+            position: absolute;
+            bottom: calc(100% + 4px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-block);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            max-height: 200px;
+            overflow-y: auto;
+            width: 260px;
+            z-index: 10;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+        }
+        .nav-ts-dropdown.open { display: block; }
+        .ts-option {
+            padding: 7px 12px;
+            cursor: pointer;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            display: flex;
+            gap: 8px;
+            color: var(--text-body);
+            transition: background 0.1s;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .ts-option:hover { background: var(--brand-purple-dim); }
+        .ts-option.selected { color: var(--brand-purple); }
+        .ts-option .ts-preview { color: var(--text-dim); overflow: hidden; text-overflow: ellipsis; }
+
+        .nav-count {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            color: var(--text-dim);
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <span class="header-title">OUTPUT VIEWER</span>
+    <span class="status-dot" id="statusDot"></span>
+    <span class="status-label" id="statusLabel">IDLE</span>
+    <button class="btn-sm" id="clearBtn" title="Clear output history">Clear</button>
+</div>
+
+<div class="tabs">
+    <div class="tab active" data-tab="live">Live</div>
+    <div class="tab" data-tab="history">History</div>
+</div>
+
+<!-- Live Panel -->
+<div class="panel active" id="panel-live">
+    <div class="live-meta" id="liveMeta">Waiting for generation...</div>
+    <div class="live-output" id="liveOutput"></div>
+</div>
+
+<!-- History Panel -->
+<div class="panel" id="panel-history">
+    <div class="history-list" id="historyList">
+        <div class="empty-state">No history yet.</div>
+    </div>
+</div>
+
+<!-- Chat Viewer Overlay Widget -->
+<div class="viewer-overlay" id="viewerOverlay">
+    <div class="viewer-widget">
+        <div class="widget-header">
+            <span class="widget-title" id="widgetTitle">CHAT PAIR</span>
+            <button class="widget-close" id="widgetClose" title="Close">✕</button>
+        </div>
+        <div class="widget-content" id="widgetContent"></div>
+        <div class="widget-nav">
+            <button class="nav-arrow" id="navPrev" title="Previous">&#8592;</button>
+            <div class="nav-ts-wrap">
+                <button class="nav-ts-btn" id="navTsBtn">—</button>
+                <div class="nav-ts-dropdown" id="navTsDrop"></div>
+            </div>
+            <span class="nav-count" id="navCount">0 / 0</span>
+            <button class="nav-arrow" id="navNext" title="Next">&#8594;</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    /* ── State ── */
+    let coreUrl    = 'http://localhost:8080';
+    let authToken  = '';
+    let liveEs     = null;      // EventSource for raw stream
+    let pollTimer  = null;
+    let isLive     = false;
+    const MARKER   = '##AF: FINAL_OUTPUT##';
+
+    /* ── History widget state ── */
+    let allEntries    = [];   // all output_history entries (newest first)
+    let currentIndex  = 0;   // index into allEntries currently shown in widget
+    let dropdownOpen  = false;
+
+    /* ── Theme / Config messages from dashboard ── */
+    window.addEventListener('message', e => {
+        if (e.data.type === 'THEME_CHANGE')   document.body.setAttribute('data-theme', e.data.theme);
+        if (e.data.type === 'FONT_CHANGE')    document.documentElement.style.setProperty('--font-size-base', e.data.fontSize + 'px');
+        if (e.data.type === 'CORE_URL_CHANGE') { coreUrl = e.data.url; init(); }
+        if (e.data.type === 'TOKEN_UPDATE')   { authToken = e.data.token; init(); }
+    });
+
+    /* ── Tabs ── */
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            tab.classList.add('active');
+            document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+            if (tab.dataset.tab === 'history') loadHistory();
+        });
+    });
+
+    /* ── Clear (output_history only — does NOT touch LLM chat history) ── */
+    document.getElementById('clearBtn').addEventListener('click', async () => {
+        if (!confirm('Clear output history? (LLM context history is unaffected)')) return;
+        try {
+            const h = authToken ? { 'Authorization': `Bearer ${authToken}` } : {};
+            await fetch(`${coreUrl}/api/output/history`, { method: 'DELETE', headers: h });
+        } catch {}
+        allEntries = [];
+        document.getElementById('historyList').innerHTML = '<div class="empty-state">No history yet.</div>';
+    });
+
+    /* ── Status polling (live tab) ── */
+    function startStatusPoll() {
+        if (pollTimer) clearInterval(pollTimer);
+        pollTimer = setInterval(checkStatus, 1000);
+    }
+
+    async function checkStatus() {
+        try {
+            const h = authToken ? { 'Authorization': `Bearer ${authToken}` } : {};
+            const r = await fetch(`${coreUrl}/api/chat/stream_status`, { headers: h });
+            if (!r.ok) return;
+            const d = await r.json();
+            const busy = d.processing || d.final_output_active;
+            setStatus(busy);
+            if (busy && !isLive) startLiveStream();
+        } catch {}
+    }
+
+    function setStatus(live) {
+        const dot   = document.getElementById('statusDot');
+        const label = document.getElementById('statusLabel');
+        if (live) {
+            dot.classList.add('live');
+            label.textContent = 'LIVE';
+        } else {
+            dot.classList.remove('live');
+            label.textContent = 'IDLE';
+        }
+    }
+
+    /* ── Live streaming ── */
+    function startLiveStream() {
+        if (liveEs) { liveEs.close(); liveEs = null; }
+        isLive = true;
+
+        document.getElementById('liveMeta').innerHTML = '<span>Generating...</span>';
+        document.getElementById('liveOutput').innerHTML = '';
+
+        const url = `${coreUrl}/api/output/raw_stream` +
+                    (authToken ? `?token=${encodeURIComponent(authToken)}` : '');
+
+        let accumulated = '';
+        const out = document.getElementById('liveOutput');
+        out.innerHTML = '';
+
+        liveEs = new EventSource(url);
+
+        liveEs.onmessage = e => {
+            const msg = JSON.parse(e.data);
+            if (msg.done) {
+                liveEs.close();
+                liveEs = null;
+                isLive = false;
+                setStatus(false);
+                // Refresh history tab if it's active
+                const histTab = document.querySelector('.tab[data-tab="history"]');
+                if (histTab && histTab.classList.contains('active')) loadHistory();
+                return;
+            }
+            if (!msg.text) return;
+
+            accumulated += msg.text;
+            renderLive(out, accumulated);
+        };
+
+        liveEs.onerror = () => {
+            if (liveEs) { liveEs.close(); liveEs = null; }
+            isLive = false;
+            setStatus(false);
+        };
+    }
+
+    function renderLive(container, text) {
+        container.innerHTML = '';
+
+        if (!text.includes(MARKER)) {
+            // All internal so far — render with thinking blocks visually distinct
+            container.appendChild(renderWithThinking(text, 'chunk-internal'));
+        } else {
+            const [before, after] = text.split(MARKER);
+
+            if (before) {
+                container.appendChild(renderWithThinking(before, 'chunk-internal'));
+            }
+
+            const marker = document.createElement('span');
+            marker.className = 'marker-line';
+            marker.textContent = MARKER;
+            container.appendChild(marker);
+
+            if (after) {
+                const span = document.createElement('span');
+                span.className = 'chunk-final';
+                span.textContent = after;
+                container.appendChild(span);
+
+                // Update meta with first line of final output as preview
+                const firstLine = after.trim().split('\n')[0];
+                if (firstLine) {
+                    document.getElementById('liveMeta').innerHTML =
+                        `<span style="color:var(--text-dim)">→ user: </span>` +
+                        `<span class="user-msg">${escHtml(firstLine.slice(0, 120))}</span>`;
+                }
+            }
+        }
+
+        container.scrollTop = container.scrollHeight;
+    }
+
+    /**
+     * Render text with <think>...</think> blocks visually distinct.
+     * Returns a DocumentFragment containing styled spans.
+     */
+    function renderWithThinking(text, baseClass) {
+        const frag = document.createDocumentFragment();
+        const thinkRe = /(<think>)([\s\S]*?)(<\/think>)/gi;
+        let lastIdx = 0;
+        let match;
+
+        while ((match = thinkRe.exec(text)) !== null) {
+            // Text before <think>
+            if (match.index > lastIdx) {
+                const span = document.createElement('span');
+                span.className = baseClass;
+                span.textContent = text.slice(lastIdx, match.index);
+                frag.appendChild(span);
+            }
+            // The <think> block
+            const block = document.createElement('span');
+            block.className = 'chunk-thinking';
+            block.textContent = match[0];
+            frag.appendChild(block);
+
+            lastIdx = match.index + match[0].length;
+        }
+        // Remaining text after last </think>
+        if (lastIdx < text.length) {
+            const span = document.createElement('span');
+            span.className = baseClass;
+            span.textContent = text.slice(lastIdx);
+            frag.appendChild(span);
+        }
+        return frag;
+    }
+
+    /* ── History — load cards from /api/output/history ── */
+    async function loadHistory() {
+        try {
+            const h = authToken ? { 'Authorization': `Bearer ${authToken}` } : {};
+            const r = await fetch(`${coreUrl}/api/output/history`, { headers: h });
+            if (!r.ok) return;
+            const d = await r.json();
+            allEntries = d.entries || [];
+            renderHistoryCards(allEntries);
+        } catch (err) {
+            document.getElementById('historyList').innerHTML =
+                `<div class="empty-state">Error loading history.</div>`;
+        }
+    }
+
+    function renderHistoryCards(entries) {
+        const list = document.getElementById('historyList');
+        if (!entries.length) {
+            list.innerHTML = '<div class="empty-state">No history yet.</div>';
+            return;
+        }
+        list.innerHTML = '';
+        entries.forEach((entry, i) => {
+            const card = document.createElement('div');
+            card.className = 'history-card';
+
+            const ts = entry.timestamp
+                ? entry.timestamp.split('T')[1]?.substring(0, 8) || entry.timestamp
+                : '??:??:??';
+            const preview = (entry.user_message || '—').slice(0, 120);
+
+            card.innerHTML = `
+                <span class="h-time">${escHtml(ts)}</span>
+                <span class="h-user">${escHtml(preview)}</span>
+                <span class="h-arrow">›</span>`;
+
+            card.addEventListener('click', () => openWidget(i));
+            list.appendChild(card);
+        });
+    }
+
+    /* ── Chat Viewer Widget ── */
+    function openWidget(index) {
+        currentIndex = index;
+        renderWidget();
+        document.getElementById('viewerOverlay').classList.add('open');
+        dropdownOpen = false;
+        document.getElementById('navTsDrop').classList.remove('open');
+        buildDropdown();
+    }
+
+    function closeWidget() {
+        document.getElementById('viewerOverlay').classList.remove('open');
+        dropdownOpen = false;
+        document.getElementById('navTsDrop').classList.remove('open');
+    }
+
+    function renderWidget() {
+        const entry = allEntries[currentIndex];
+        if (!entry) return;
+
+        const total = allEntries.length;
+
+        // Title
+        document.getElementById('widgetTitle').textContent =
+            `CHAT PAIR  ·  ${entry.timestamp || ''}`;
+
+        // Content
+        const content = document.getElementById('widgetContent');
+        content.innerHTML = '';
+
+        const userDiv = document.createElement('div');
+        userDiv.className = 'chat-pair-user';
+        userDiv.innerHTML = `<div class="pair-role">USER</div><div class="pair-text">${escHtml(entry.user_message || '')}</div>`;
+        content.appendChild(userDiv);
+
+        const asstDiv = document.createElement('div');
+        asstDiv.className = 'chat-pair-asst';
+        asstDiv.innerHTML = `<div class="pair-role">ASSISTANT</div><div class="pair-text">${escHtml(entry.response || '(no response)')}</div>`;
+        content.appendChild(asstDiv);
+        content.scrollTop = 0;
+
+        // Nav bar
+        const ts = entry.timestamp
+            ? entry.timestamp.split('T')[1]?.substring(0, 8) || entry.timestamp
+            : '??:??:??';
+        document.getElementById('navTsBtn').textContent = ts;
+        document.getElementById('navCount').textContent = `${currentIndex + 1} / ${total}`;
+        document.getElementById('navPrev').disabled = currentIndex <= 0;
+        document.getElementById('navNext').disabled = currentIndex >= total - 1;
+
+        // Highlight selected in dropdown
+        document.querySelectorAll('.ts-option').forEach((el, i) => {
+            el.classList.toggle('selected', i === currentIndex);
+        });
+    }
+
+    function buildDropdown() {
+        const drop = document.getElementById('navTsDrop');
+        drop.innerHTML = '';
+        allEntries.forEach((entry, i) => {
+            const ts = entry.timestamp
+                ? entry.timestamp.split('T')[1]?.substring(0, 8) || entry.timestamp
+                : '??:??:??';
+            const preview = (entry.user_message || '').slice(0, 40);
+
+            const opt = document.createElement('div');
+            opt.className = 'ts-option' + (i === currentIndex ? ' selected' : '');
+            opt.innerHTML = `<span>${escHtml(ts)}</span><span class="ts-preview">${escHtml(preview)}</span>`;
+            opt.addEventListener('click', () => {
+                currentIndex = i;
+                renderWidget();
+                dropdownOpen = false;
+                drop.classList.remove('open');
+            });
+            drop.appendChild(opt);
+        });
+    }
+
+    /* Widget controls */
+    document.getElementById('widgetClose').addEventListener('click', closeWidget);
+
+    document.getElementById('viewerOverlay').addEventListener('click', e => {
+        // Close if clicking the dim overlay (not the widget itself)
+        if (e.target === document.getElementById('viewerOverlay')) closeWidget();
+    });
+
+    document.getElementById('navPrev').addEventListener('click', () => {
+        if (currentIndex > 0) { currentIndex--; renderWidget(); }
+    });
+
+    document.getElementById('navNext').addEventListener('click', () => {
+        if (currentIndex < allEntries.length - 1) { currentIndex++; renderWidget(); }
+    });
+
+    document.getElementById('navTsBtn').addEventListener('click', e => {
+        e.stopPropagation();
+        dropdownOpen = !dropdownOpen;
+        document.getElementById('navTsDrop').classList.toggle('open', dropdownOpen);
+    });
+
+    // Close dropdown on outside click
+    document.addEventListener('click', () => {
+        if (dropdownOpen) {
+            dropdownOpen = false;
+            document.getElementById('navTsDrop').classList.remove('open');
+        }
+    });
+
+    // Keyboard navigation
+    document.addEventListener('keydown', e => {
+        if (!document.getElementById('viewerOverlay').classList.contains('open')) return;
+        if (e.key === 'Escape') closeWidget();
+        if (e.key === 'ArrowLeft'  && !document.getElementById('navPrev').disabled) { currentIndex--; renderWidget(); }
+        if (e.key === 'ArrowRight' && !document.getElementById('navNext').disabled) { currentIndex++; renderWidget(); }
+    });
+
+    function escHtml(s) {
+        return String(s)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
+    /* ── Boot ── */
+    function init() {
+        startStatusPoll();
+        loadHistory();
+    }
+
+    // Try to grab config from localStorage (same keys as dashboard)
+    try {
+        const cu = localStorage.getItem('lyrn_core_url');
+        if (cu) coreUrl = cu;
+        const tk = localStorage.getItem('lyrn_admin_token');
+        if (tk) authToken = tk;
+    } catch {}
+
+    init();
+</script>
+</body>
+</html>

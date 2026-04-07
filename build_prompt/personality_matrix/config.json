@@ -1,0 +1,6 @@
+{
+  "begin_bracket": "###PERSONALITY_MATRIX_START###",
+  "end_bracket": "###PERSONALITY_MATRIX_END###",
+  "rwi_text": "Identity traits, behavioral biases, and stable dispositions.",
+  "content_file": "content.txt"
+}

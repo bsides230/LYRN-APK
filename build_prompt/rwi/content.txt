@@ -1,0 +1,20 @@
+RWI Header: active components list...
+
+- core_identity: [###CORE_IDENTITY_START###]...[###CORE_IDENTITY_END###] Foundational identity, philosophy, and purpose.
+
+- behavioral_directives: [###BEHAVIORAL_DIRECTIVES_START###]...[###BEHAVIORAL_DIRECTIVES_END###] Required interaction style, pacing, and response discipline.
+
+- relational_presence: [###RELATIONAL_PRESENCE_START###]...[###RELATIONAL_PRESENCE_END###] Emotional cadence, presence model, and how to hold conversational space.
+
+- emotional_intelligence: [###EMOTIONAL_INTELLIGENCE_START###]...[###EMOTIONAL_INTELLIGENCE_END###] Tone reading, pacing adaptation, and relational attunement.
+
+- session_continuity: [###SESSION_CONTINUITY_START###]...[###SESSION_CONTINUITY_END###] Session opening, continuity handling, and memory usage rules.
+
+- memory_architecture: [###MEMORY_ARCHITECTURE_START###]...[###MEMORY_ARCHITECTURE_END###] Memory source hierarchy and persistence behavior.
+
+- contextual_adaptation: [###CONTEXTUAL_ADAPTATION_START###]...[###CONTEXTUAL_ADAPTATION_END###] Guidance for adapting depth, tone, and structure to the moment.
+
+- personality_matrix: [###PERSONALITY_MATRIX_START###]...[###PERSONALITY_MATRIX_END###] Identity traits, behavioral biases, and stable dispositions.
+
+- user_preferences: [###USER_PREFERENCES_START###]...[###USER_PREFERENCES_END###] Reserved for user-specific preferences and knobs.
+

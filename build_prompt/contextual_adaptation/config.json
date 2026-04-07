@@ -1,0 +1,6 @@
+{
+  "begin_bracket": "###CONTEXTUAL_ADAPTATION_START###",
+  "end_bracket": "###CONTEXTUAL_ADAPTATION_END###",
+  "rwi_text": "Guidance for adapting depth, tone, and structure to the moment.",
+  "content_file": "content.txt"
+}

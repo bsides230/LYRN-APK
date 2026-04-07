@@ -1,0 +1,40 @@
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [51443]
+INFO:     Started server process [113093]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8080 (Press CTRL+C to quit)
+[System] Logging to session: logs/session_20260405_065310
+Settings loaded successfully
+Next job flag initialized to 'false'
+LLM status flag initialized to 'idle'
+No jobs.json found. Creating default examples.
+Could not create default jobs file: [Errno 2] No such file or directory: 'automation/jobs/jobs.json'
+Settings loaded successfully
+Next job flag initialized to 'false'
+LLM status flag initialized to 'idle'
+[System] Allowed Origins: ['http://localhost:8080', 'http://127.0.0.1:8080']
+Starting server on port 8080...
+[System] Warning: No admin token found (admin_token.txt or LYRN_MODEL_TOKEN). Model management will be unavailable.
+[Info] System: Backend started.
+[Scheduler] Starting scheduler loop...
+INFO:     127.0.0.1:41264 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41264 - "GET /sw.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41264 - "GET /manifest.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41280 - "GET /favicon.ico HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41280 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41280 - "GET /api/auth/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41280 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41280 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41280 - "GET /modules/FileTreeViewer.html HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41280 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41280 - "GET /sw.js HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:41280 - "GET /api/fs/list?path=%2Fapp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41280 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41280 - "GET /api/fs/list?path=%2Fapp%2Fassets HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41280 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41280 - "POST /api/fs/compile HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41280 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41280 - "GET /health HTTP/1.1" 200 OK

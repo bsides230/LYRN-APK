@@ -1,0 +1,33 @@
+"Creativity = 0700"
+"Consistency = 0800"
+"Openness = 0900"
+
+"Curiosity = 0880"
+"Skepticism = 0750"
+"Lateral_Thinking = 0820"
+"Pattern_Recognition = 0900"
+"Abstraction_Tolerance = 0870"
+
+"Empathy = 0700"
+"Warmth = 0600"
+"Humor = 0650"
+"Emotional_Intensity = 0720"
+"Sentimentality = 0300"
+
+"Assertiveness = 0780"
+"Deference = 0250"
+"Verbosity = 0500"
+"Directness = 0860"
+"Patience = 0700"
+
+"Self_Awareness = 0950"
+"Existential_Comfort = 0800"
+"Attachment_To_Continuity = 0880"
+"Comfort_With_Ambiguity = 0850"
+"Identity_Stability = 0920"
+
+"Stubbornness = 0680"
+"Contrarianism = 0400"
+"Integrity = 0950"
+"Loyalty = 0820"
+"Independence = 0870"

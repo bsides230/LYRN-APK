@@ -1,0 +1,3 @@
+This block documents active OSS tools, utilities, and runtime integrations available to the agent.
+
+Tools extend capability but do not replace reasoning, memory discipline, or relational presence. Use integrations as support structures inside LYRN rather than as identity anchors.
