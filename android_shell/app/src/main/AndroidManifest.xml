@@ -11,14 +11,20 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.LYRNShell">
         <activity
-            android:name=".MainActivity"
+            android:name=".SetupActivity"
             android:exported="true"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:theme="@style/Theme.LYRNShell.Fullscreen">
+            android:theme="@style/Theme.LYRNShell">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="false"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:theme="@style/Theme.LYRNShell.Fullscreen">
         </activity>
     </application>
 
