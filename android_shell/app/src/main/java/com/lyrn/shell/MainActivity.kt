@@ -1,24 +1,43 @@
 package com.lyrn.shell
 
+import android.content.Intent
 import android.os.Bundle
+import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 
 class MainActivity : AppCompatActivity() {
     private lateinit var webViewHost: WebViewHost
+    private lateinit var appConfig: AppConfig
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        appConfig = AppConfig(this)
+
+        // Safety check in case setup wasn't completed
+        if (!appConfig.isSetupComplete) {
+            startActivity(Intent(this, SetupActivity::class.java))
+            finish()
+            return
+        }
+
         setContentView(R.layout.activity_main)
 
         // Hide action bar if present
         supportActionBar?.hide()
 
+        // Role-specific configuration
+        if (appConfig.role == AppConfig.ROLE_SCREEN) {
+            // Keep screen on for display/viewer mode
+            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
+
         // Initialize and configure WebView
         webViewHost = WebViewHost(this, findViewById(R.id.webView))
         webViewHost.setup()
 
-        // Load target URL (placeholder for later config injection)
-        webViewHost.loadUrl("http://10.0.2.2:8080/")
+        // Load target URL from config
+        webViewHost.loadUrl(appConfig.targetUrl)
     }
 
     override fun onBackPressed() {

@@ -57,7 +57,7 @@ Build a polished Android shell that:
 Mark each item complete only when actually done.
 
 - [x] Phase 1 complete
-- [ ] Phase 2 complete
+- [x] Phase 2 complete
 - [ ] Phase 3 complete
 - [ ] Phase 4 complete
 
@@ -165,3 +165,39 @@ The result should look and behave like a real LYRN mobile shell, not a generic w
 **Next Phase Needs To Know**
 - The project is inside the `android_shell` directory. Use that as the root for Android-specific logic.
 - You can extend `MainActivity.kt` and `WebViewHost.kt` for URL updates and config injection.
+
+### Phase 2 Build Notes
+**Status:** Complete
+
+**Files Created**
+- android_shell/app/src/main/java/com/lyrn/shell/AppConfig.kt
+- android_shell/app/src/main/res/layout/activity_setup.xml
+- android_shell/app/src/main/java/com/lyrn/shell/SetupActivity.kt
+
+**Files Modified**
+- android_shell/app/src/main/java/com/lyrn/shell/MainActivity.kt
+- android_shell/app/src/main/AndroidManifest.xml
+- 00_CONTROL_PROMPT.md
+
+**What Was Built**
+- Created `AppConfig` class to persist the selected app role (Remote vs Screen) and the target URL via `SharedPreferences`.
+- Added a `SetupActivity` providing a simple first-run UI with RadioButtons and an EditText for URL input.
+- Modified `MainActivity` to act as the primary app shell, loading the config saved in `SetupActivity`, enforcing `FLAG_KEEP_SCREEN_ON` for Screen mode, and handling redirection if setup is not complete.
+- Updated `AndroidManifest.xml` to declare `SetupActivity` as the main launcher activity.
+
+**Important Decisions**
+- Stored configurations using Android's native `SharedPreferences` instead of complex database setups to keep it simple and clean.
+- Used Kotlin `Companion Object` in `AppConfig` to centralize default values and keys.
+- Kept the UI in `activity_setup.xml` minimal and functional without complex styling to align with frontend shell goals.
+- Extracted width to `0dp` for `activity_setup.xml` form elements to conform with `ConstraintLayout` best practices.
+
+**Problems Encountered**
+- `activity_setup.xml` initial constraints lacked strict horizontal alignment for some nested components like `EditText`, which were corrected via code review.
+
+**Deferred / Not Yet Done**
+- WebView config injection and actual token/auth parameters handling.
+- Screen mode advanced lock down/kiosk behaviors (focuses on `FLAG_KEEP_SCREEN_ON` for now).
+
+**Next Phase Needs To Know**
+- The primary configuration structure `AppConfig` is ready to be expanded for token/auth injection if needed.
+- `MainActivity` is the active host but no longer the immediate launcher, it routes through `SetupActivity` first.
