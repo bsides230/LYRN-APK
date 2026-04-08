@@ -13,10 +13,6 @@ class NativeBridge(private val context: Context, private val appConfig: AppConfi
         config.put("role", appConfig.role)
         config.put("targetUrl", appConfig.targetUrl)
 
-        // Add screen mode specific configuration
-        val isScreen = appConfig.role == AppConfig.ROLE_SCREEN
-        config.put("isScreenMode", isScreen)
-
         return config.toString()
     }
 
