@@ -10,7 +10,7 @@ import android.webkit.WebViewClient
 class WebViewHost(private val context: Context, private val webView: WebView) {
 
     @SuppressLint("SetJavaScriptEnabled")
-    fun setup() {
+    fun setup(nativeBridge: NativeBridge? = null) {
         val settings: WebSettings = webView.settings
 
         // Essential settings for modern web apps
@@ -30,6 +30,11 @@ class WebViewHost(private val context: Context, private val webView: WebView) {
         // Set clients
         webView.webViewClient = WebViewClient()
         webView.webChromeClient = WebChromeClient()
+
+        // Inject native bridge
+        if (nativeBridge != null) {
+            webView.addJavascriptInterface(nativeBridge, "LyrnNative")
+        }
     }
 
     fun loadUrl(url: String) {

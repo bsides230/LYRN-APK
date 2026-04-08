@@ -730,6 +730,9 @@
 
             <!-- ADVANCED TAB -->
             <div id="tab-advanced" class="tab-pane">
+                <div class="settings-header" id="native-shell-settings-header" style="display:none;">Native Shell Config</div>
+                <button class="btn-full-width" id="btn-reset-native-config" style="display:none; margin-bottom: 8px; border-color: var(--error-color); color: var(--error-color);" onclick="if(window.LyrnNative) window.LyrnNative.resetConfig();">Reset App to Setup</button>
+
                 <div class="settings-header">System Config (Server)</div>
                 <div style="display: flex; gap: 8px; margin-bottom: 8px;">
                     <button class="btn-full-width" onclick="fetchSystemConfig()">Load Config</button>
@@ -792,6 +795,10 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             loadSettings();
+
+            // Check for Native Bridge configuration
+            checkNativeConfig();
+
             renderDock();
             initDockDrag();
             startClock();
@@ -828,6 +835,63 @@
             // Init Layouts
             loadLayoutsAndCheckDefault();
         });
+
+        /* =========================================
+           NATIVE SHELL INTEGRATION
+           ========================================= */
+        function checkNativeConfig() {
+            if (window.LyrnNative) {
+                // Show native settings
+                document.getElementById('native-shell-settings-header').style.display = 'block';
+                document.getElementById('btn-reset-native-config').style.display = 'block';
+
+                try {
+                    const configStr = window.LyrnNative.getConfig();
+                    const config = JSON.parse(configStr);
+
+                    if (config.targetUrl) {
+                        coreUrl = config.targetUrl;
+                        document.getElementById('inp-core-url').value = config.targetUrl;
+                    }
+
+                    if (config.isScreenMode) {
+                        // Apply Screen Mode Rules
+                        document.body.classList.add('no-select');
+
+                        // Hide UI elements not meant for screen mode
+                        document.getElementById('top-system-bar').style.display = 'none';
+                        document.getElementById('floating-dock').style.display = 'none';
+
+                        // Prevent popups
+                        localStorage.setItem('lyrn-welcome-hidden', 'true');
+                        localStorage.setItem('lyrn-conn-hidden', 'true');
+
+                        // Launch a default screen display (e.g., system status)
+                        // Note: Wait a moment for DOM to finish rendering
+                        setTimeout(() => {
+                            const mod = MODULE_REGISTRY.find(m => m.id === 'mod_server_status');
+                            if(mod) {
+                                toggleWindow(mod);
+                                const win = document.getElementById('win_' + mod.id);
+                                if(win) {
+                                    // Maximize and hide header for screen mode
+                                    win.classList.add('maximized');
+                                    win.style.top = '0';
+                                    win.style.left = '0';
+                                    win.style.width = '100%';
+                                    win.style.height = '100%';
+
+                                    const header = win.querySelector('.window-header');
+                                    if(header) header.style.display = 'none';
+                                }
+                            }
+                        }, 500);
+                    }
+                } catch (e) {
+                    console.error("Failed to parse native config", e);
+                }
+            }
+        }
 
         /* =========================================
            TABS & LAYOUTS & ADVANCED

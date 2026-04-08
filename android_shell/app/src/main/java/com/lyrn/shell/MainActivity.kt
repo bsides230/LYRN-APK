@@ -34,7 +34,10 @@ class MainActivity : AppCompatActivity() {
 
         // Initialize and configure WebView
         webViewHost = WebViewHost(this, findViewById(R.id.webView))
-        webViewHost.setup()
+
+        // Pass the native bridge
+        val nativeBridge = NativeBridge(this, appConfig)
+        webViewHost.setup(nativeBridge)
 
         // Load target URL from config
         webViewHost.loadUrl(appConfig.targetUrl)
