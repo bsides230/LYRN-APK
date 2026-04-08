@@ -3,6 +3,7 @@ package com.lyrn.shell
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import androidx.activity.OnBackPressedCallback
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
@@ -69,20 +70,27 @@ class MainActivity : AppCompatActivity() {
         val nativeBridge = NativeBridge(this, appConfig)
         webViewHost.setup(nativeBridge, isScreenMode)
 
+        // Setup Back Press Dispatcher
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (appConfig.role == AppConfig.ROLE_SCREEN) {
+                    // Do not allow back presses in Screen mode to prevent accidental exits
+                    return
+                }
+
+                if (webViewHost.canGoBack()) {
+                    webViewHost.goBack()
+                } else {
+                    // Disable the callback to let the default handler process the event
+                    isEnabled = false
+                    onBackPressedDispatcher.onBackPressed()
+                    isEnabled = true
+                }
+            }
+        })
+
         // Load target URL from config
         webViewHost.loadUrl(appConfig.targetUrl)
     }
 
-    override fun onBackPressed() {
-        if (appConfig.role == AppConfig.ROLE_SCREEN) {
-            // Do not allow back presses in Screen mode to prevent accidental exits
-            return
-        }
-
-        if (webViewHost.canGoBack()) {
-            webViewHost.goBack()
-        } else {
-            super.onBackPressed()
-        }
-    }
 }

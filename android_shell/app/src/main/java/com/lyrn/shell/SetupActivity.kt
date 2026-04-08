@@ -24,7 +24,6 @@ class SetupActivity : AppCompatActivity() {
         setContentView(R.layout.activity_setup)
         supportActionBar?.hide()
 
-        val rgRole = findViewById<RadioGroup>(R.id.rgRole)
         val rbRemote = findViewById<RadioButton>(R.id.rbRemote)
         val rbScreen = findViewById<RadioButton>(R.id.rbScreen)
         val etUrl = findViewById<EditText>(R.id.etUrl)
