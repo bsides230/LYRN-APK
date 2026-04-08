@@ -59,7 +59,7 @@ Mark each item complete only when actually done.
 - [x] Phase 1 complete
 - [x] Phase 2 complete
 - [x] Phase 3 complete
-- [ ] Phase 4 complete
+- [x] Phase 4 complete
 
 ---
 
@@ -235,3 +235,36 @@ The result should look and behave like a real LYRN mobile shell, not a generic w
 **Next Phase Needs To Know**
 - `LyrnNative` is available globally in the browser context if running from the app.
 - Config returned from `getConfig()` is stringified JSON.
+
+### Phase 4 Build Notes
+**Status:** Complete
+
+**Files Created**
+- none
+
+**Files Modified**
+- android_shell/app/src/main/res/layout/activity_main.xml
+- android_shell/app/src/main/java/com/lyrn/shell/WebViewHost.kt
+- android_shell/app/src/main/java/com/lyrn/shell/MainActivity.kt
+- 00_CONTROL_PROMPT.md
+
+**What Was Built**
+- Prevented accidental exit in screen mode by ignoring `onBackPressed` requests.
+- Disabled WebView long click, haptic feedback, and over-scroll in screen mode to prevent unintended interactions.
+- Set up an automatic retry logic for WebView loads, reloading after 10 seconds if there's a load error or HTTP error on the main frame in screen mode.
+- Implemented an immersive fullscreen state hiding the status and navigation bars in screen mode via `WindowInsetsControllerCompat`.
+- Provided a hidden escape hatch in screen mode: clicking the top right corner 5 times triggers an app reset, allowing administrators to recover without killing the app process.
+
+**Important Decisions**
+- Chose a multi-tap invisible view (`maintenanceTapArea`) to act as the escape hatch because it is completely hidden and difficult to hit accidentally 5 times, while still easy enough for someone who knows the secret.
+- Set a generous 10 second delay for auto-reload to avoid spamming network requests during an outage.
+- Ignored `onBackPressed` rather than consuming it in complex ways to provide a rock-solid lock down in screen mode.
+
+**Problems Encountered**
+- Re-architecting `WebViewClient` to support automatic reloading took extra consideration to only apply to the main frame load failures instead of background resource failures. Checked `request?.isForMainFrame` to ensure only correct events were caught.
+
+**Deferred / Not Yet Done**
+- Custom loading screen or fallback local HTML page when connection is failing (just retries silently for now).
+
+**Next Phase Needs To Know**
+- Screen mode logic is heavily applied within `MainActivity.kt` and `WebViewHost.kt` conditionally via `isScreenMode`.
