@@ -46,8 +46,12 @@ class DashboardActivity : AppCompatActivity() {
             nodes = emptyList(),
             onEditClick = { node -> showEditNodeDialog(node) },
             onDeleteClick = { node -> showDeleteConfirmation(node) },
-            onNodeClick = { _ ->
-                // TODO: Launch WebView with this node in Phase 3
+            onNodeClick = { node ->
+                val intent = android.content.Intent(this, com.lyrn.shell.MainActivity::class.java).apply {
+                    putExtra(com.lyrn.shell.MainActivity.EXTRA_URL, node.url)
+                    putExtra(com.lyrn.shell.MainActivity.EXTRA_ROLE, node.role)
+                }
+                startActivity(intent)
             }
         )
         recyclerView.adapter = nodeAdapter

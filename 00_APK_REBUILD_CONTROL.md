@@ -29,7 +29,7 @@ The app will be a Dashboard showing a grid/list of saved Node Cards (each with I
 # Global Checklist
 - [x] Phase 1: Foundation & Data Model
 - [x] Phase 2: Dashboard UI & Node Management
-- [ ] Phase 3: WebView Integration & Bridge Updates
+- [x] Phase 3: WebView Integration & Bridge Updates
 - [ ] Phase 4: Status Pinging & Polish
 
 # Build Notes Section
@@ -43,7 +43,7 @@ The app will be a Dashboard showing a grid/list of saved Node Cards (each with I
 # Phase Completion Tracking
 - [x] Phase 1: Complete
 - [x] Phase 2: Complete
-- [ ] Phase 3: Not Started
+- [x] Phase 3: Complete
 - [ ] Phase 4: Not Started
 
 ### Phase 1: Foundation & Data Model
@@ -71,3 +71,14 @@ The app will be a Dashboard showing a grid/list of saved Node Cards (each with I
 - **Why it was done:** Replacing the old 1-to-1 setup with a dashboard allowing multi-node management required for the goal.
 - **Deviations:** Modified `MainActivity`'s setup logic block to not reference the deleted `SetupActivity`. Modified `NativeBridge`'s `resetConfig` method to launch `DashboardActivity`.
 - **Decisions made:** Using an `AlertDialog` for Add/Edit is simpler and faster than fragments or bottom sheets.
+
+### Phase 3: WebView Integration & Bridge Updates
+- **Status:** Complete
+- **What was done:**
+  - Refactored `NativeBridge.kt` to accept `role` and `targetUrl` explicitly, removing the dependency on `AppConfig`. Updated its `resetConfig` method to `finish()` the current Activity if possible, or launch the Dashboard.
+  - Refactored `MainActivity.kt` to accept `EXTRA_URL` and `EXTRA_ROLE` intent extras and pass them to `NativeBridge` instead of using `AppConfig`.
+  - Updated `DashboardActivity.kt` so that clicking a node card launches `MainActivity` with the selected node's `url` and `role` as extras.
+  - Verified logic using tests and compilation.
+- **Why it was done:** To allow the WebView to open dynamically with the configuration of any node clicked on the dashboard, matching the new multi-node architecture.
+- **Deviations:** Modified `resetConfig` in `NativeBridge.kt` to explicitly finish the Activity if it is an instance of `Activity`, ensuring the WebView is cleanly dismissed from the stack.
+- **Decisions made:** Reusing `MainActivity` by passing intent extras avoids creating unnecessary Fragment/Activity abstractions, and the default back button handling (`super.onBackPressed()`) naturally returns the user to the Dashboard.
