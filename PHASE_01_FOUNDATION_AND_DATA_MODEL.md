@@ -21,15 +21,15 @@ Before building a dashboard, the app must have a way to store and retrieve multi
 - Current codebase is compiling and stable.
 
 # Task Checklist
-- [ ] Add JSON serialization library dependency (e.g., Gson) to `app/build.gradle`.
-- [ ] Create `Node` data class in a new model package.
-- [ ] Create `NodeRepository` class to manage SharedPreferences storage.
-- [ ] Implement `getNodes()`, `addNode()`, `updateNode()`, `deleteNode()` methods.
-- [ ] Update `AppConfig` to either be replaced by `NodeRepository` or wrap it to maintain backward compatibility temporarily if needed (though replacing is preferred).
+- [x] Add JSON serialization library dependency (e.g., Gson) to `app/build.gradle`.
+- [x] Create `Node` data class in a new model package.
+- [x] Create `NodeRepository` class to manage SharedPreferences storage.
+- [x] Implement `getNodes()`, `addNode()`, `updateNode()`, `deleteNode()` methods.
+- [x] Update `AppConfig` to either be replaced by `NodeRepository` or wrap it to maintain backward compatibility temporarily if needed (though replacing is preferred).
 
 # Validation Checklist
-- [ ] Project builds successfully.
-- [ ] Unit tests (if added) or manual logging confirm nodes can be saved, retrieved, and deleted from SharedPreferences.
+- [x] Project builds successfully.
+- [x] Unit tests (if added) or manual logging confirm nodes can be saved, retrieved, and deleted from SharedPreferences.
 
 # Risks / Watchouts
 - Ensuring data persistence works correctly across app restarts.

@@ -13,7 +13,7 @@ The app will be a Dashboard showing a grid/list of saved Node Cards (each with I
 # Phase Index
 | Phase | Name | Goal | Status | File |
 |-------|------|------|--------|------|
-| 1 | Foundation & Data Model | Replace single-URL storage with a multi-node data model | Not Started | `PHASE_01_FOUNDATION_AND_DATA_MODEL.md` |
+| 1 | Foundation & Data Model | Replace single-URL storage with a multi-node data model | Complete | `PHASE_01_FOUNDATION_AND_DATA_MODEL.md` |
 | 2 | Dashboard UI & Node Management | Build the RecyclerView dashboard and node creation UI | Not Started | `PHASE_02_DASHBOARD_AND_NODE_MANAGEMENT.md` |
 | 3 | WebView Integration & Bridge Updates | Launch WebView as an overlay and update NativeBridge | Not Started | `PHASE_03_WEBVIEW_INTEGRATION.md` |
 | 4 | Status Pinging & Polish | Add connection status polling and finalize user flows | Not Started | `PHASE_04_STATUS_PINGING_AND_POLISH.md` |
@@ -27,7 +27,7 @@ The app will be a Dashboard showing a grid/list of saved Node Cards (each with I
 - Check off completed tasks in both the phase file and control file
 
 # Global Checklist
-- [ ] Phase 1: Foundation & Data Model
+- [x] Phase 1: Foundation & Data Model
 - [ ] Phase 2: Dashboard UI & Node Management
 - [ ] Phase 3: WebView Integration & Bridge Updates
 - [ ] Phase 4: Status Pinging & Polish
@@ -41,7 +41,20 @@ The app will be a Dashboard showing a grid/list of saved Node Cards (each with I
 - **Role Handling:** The "role" concept will be preserved per node.
 
 # Phase Completion Tracking
-- [ ] Phase 1: Not Started
+- [x] Phase 1: Complete
 - [ ] Phase 2: Not Started
 - [ ] Phase 3: Not Started
 - [ ] Phase 4: Not Started
+
+### Phase 1: Foundation & Data Model
+- **Status:** Complete
+- **What was done:**
+  - Added Gson dependency to `app/build.gradle` for JSON serialization.
+  - Added Robolectric and androidx.test.core dependencies for testing.
+  - Created `Node` data model with ID, Name, URL, Category, Color, and Role.
+  - Created `NodeRepository` managing SharedPreferences storage, persisting a list of nodes via JSON.
+  - Updated `AppConfig` to act as a backward compatibility layer, mapping its legacy `role` and `targetUrl` getters/setters to the first node in the repository, and migrating any legacy configuration to a single node.
+  - Verified project compiles and tests pass successfully.
+- **Why it was done:** The app needed a flexible multi-node structure to evolve into a dashboard, replacing the hardcoded single-URL configuration.
+- **Deviations:** Refactored `AppConfig` to wrap `NodeRepository` instead of replacing it entirely, maintaining backward compatibility for existing `MainActivity` and `SetupActivity` logic that heavily relies on `AppConfig` until they are updated in future phases.
+- **Decisions made:** SharedPreferences + JSON was chosen as planned. Migrating legacy `role` and `target_url` config keys directly into the first `Node` entry simplifies transitions.
