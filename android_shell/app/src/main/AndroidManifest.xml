@@ -11,7 +11,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.LYRNShell">
         <activity
-            android:name=".SetupActivity"
+            android:name=".ui.dashboard.DashboardActivity"
             android:exported="true"
             android:theme="@style/Theme.LYRNShell">
             <intent-filter>

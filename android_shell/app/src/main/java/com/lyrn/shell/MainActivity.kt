@@ -18,12 +18,7 @@ class MainActivity : AppCompatActivity() {
 
         appConfig = AppConfig(this)
 
-        // Safety check in case setup wasn't completed
-        if (!appConfig.isSetupComplete) {
-            startActivity(Intent(this, SetupActivity::class.java))
-            finish()
-            return
-        }
+        // Setup functionality migrated to DashboardActivity, skipping SetupActivity launch
 
         setContentView(R.layout.activity_main)
 

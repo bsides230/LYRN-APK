@@ -14,7 +14,7 @@ The app will be a Dashboard showing a grid/list of saved Node Cards (each with I
 | Phase | Name | Goal | Status | File |
 |-------|------|------|--------|------|
 | 1 | Foundation & Data Model | Replace single-URL storage with a multi-node data model | Complete | `PHASE_01_FOUNDATION_AND_DATA_MODEL.md` |
-| 2 | Dashboard UI & Node Management | Build the RecyclerView dashboard and node creation UI | Not Started | `PHASE_02_DASHBOARD_AND_NODE_MANAGEMENT.md` |
+| 2 | Dashboard UI & Node Management | Build the RecyclerView dashboard and node creation UI | Complete | `PHASE_02_DASHBOARD_AND_NODE_MANAGEMENT.md` |
 | 3 | WebView Integration & Bridge Updates | Launch WebView as an overlay and update NativeBridge | Not Started | `PHASE_03_WEBVIEW_INTEGRATION.md` |
 | 4 | Status Pinging & Polish | Add connection status polling and finalize user flows | Not Started | `PHASE_04_STATUS_PINGING_AND_POLISH.md` |
 
@@ -28,7 +28,7 @@ The app will be a Dashboard showing a grid/list of saved Node Cards (each with I
 
 # Global Checklist
 - [x] Phase 1: Foundation & Data Model
-- [ ] Phase 2: Dashboard UI & Node Management
+- [x] Phase 2: Dashboard UI & Node Management
 - [ ] Phase 3: WebView Integration & Bridge Updates
 - [ ] Phase 4: Status Pinging & Polish
 
@@ -42,7 +42,7 @@ The app will be a Dashboard showing a grid/list of saved Node Cards (each with I
 
 # Phase Completion Tracking
 - [x] Phase 1: Complete
-- [ ] Phase 2: Not Started
+- [x] Phase 2: Complete
 - [ ] Phase 3: Not Started
 - [ ] Phase 4: Not Started
 
@@ -58,3 +58,16 @@ The app will be a Dashboard showing a grid/list of saved Node Cards (each with I
 - **Why it was done:** The app needed a flexible multi-node structure to evolve into a dashboard, replacing the hardcoded single-URL configuration.
 - **Deviations:** Refactored `AppConfig` to wrap `NodeRepository` instead of replacing it entirely, maintaining backward compatibility for existing `MainActivity` and `SetupActivity` logic that heavily relies on `AppConfig` until they are updated in future phases.
 - **Decisions made:** SharedPreferences + JSON was chosen as planned. Migrating legacy `role` and `target_url` config keys directly into the first `Node` entry simplifies transitions.
+
+### Phase 2: Dashboard UI & Node Management
+- **Status:** Complete
+- **What was done:**
+  - Created `DashboardActivity` with a `RecyclerView` and `FloatingActionButton`.
+  - Added `NodeAdapter` for binding `Node` objects to the `RecyclerView`.
+  - Created layouts `activity_dashboard.xml` and `item_node_card.xml`.
+  - Created `dialog_node_edit.xml` and implemented a dialog to add/edit/delete nodes.
+  - Removed `SetupActivity` and updated `AndroidManifest.xml` to set `DashboardActivity` as the launcher.
+  - Updated `MainActivity` and `NativeBridge` to bypass/replace legacy `SetupActivity` logic.
+- **Why it was done:** Replacing the old 1-to-1 setup with a dashboard allowing multi-node management required for the goal.
+- **Deviations:** Modified `MainActivity`'s setup logic block to not reference the deleted `SetupActivity`. Modified `NativeBridge`'s `resetConfig` method to launch `DashboardActivity`.
+- **Decisions made:** Using an `AlertDialog` for Add/Edit is simpler and faster than fragments or bottom sheets.
