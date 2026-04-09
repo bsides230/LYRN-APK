@@ -69,6 +69,28 @@
             app:layout_constraintTop_toBottomOf="@id/tvNodeUrl"
             tools:text="Role: remote" />
 
+        <View
+            android:id="@+id/statusIndicator"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/circle_shape"
+            app:layout_constraintStart_toStartOf="@id/tvNodeName"
+            app:layout_constraintTop_toBottomOf="@id/tvNodeRole" />
+
+        <TextView
+            android:id="@+id/tvStatusText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:textSize="12sp"
+            android:textColor="@android:color/darker_gray"
+            app:layout_constraintEnd_toStartOf="@id/ivEdit"
+            app:layout_constraintStart_toEndOf="@id/statusIndicator"
+            app:layout_constraintTop_toTopOf="@id/statusIndicator"
+            app:layout_constraintBottom_toBottomOf="@id/statusIndicator"
+            tools:text="Unknown" />
+
         <ImageView
             android:id="@+id/ivEdit"
             android:layout_width="wrap_content"

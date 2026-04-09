@@ -16,7 +16,7 @@ The app will be a Dashboard showing a grid/list of saved Node Cards (each with I
 | 1 | Foundation & Data Model | Replace single-URL storage with a multi-node data model | Complete | `PHASE_01_FOUNDATION_AND_DATA_MODEL.md` |
 | 2 | Dashboard UI & Node Management | Build the RecyclerView dashboard and node creation UI | Complete | `PHASE_02_DASHBOARD_AND_NODE_MANAGEMENT.md` |
 | 3 | WebView Integration & Bridge Updates | Launch WebView as an overlay and update NativeBridge | Not Started | `PHASE_03_WEBVIEW_INTEGRATION.md` |
-| 4 | Status Pinging & Polish | Add connection status polling and finalize user flows | Not Started | `PHASE_04_STATUS_PINGING_AND_POLISH.md` |
+| 4 | Status Pinging & Polish | Add connection status polling and finalize user flows | Complete | `PHASE_04_STATUS_PINGING_AND_POLISH.md` |
 
 # Global Rules
 - Do not drift from defined scope
@@ -30,7 +30,7 @@ The app will be a Dashboard showing a grid/list of saved Node Cards (each with I
 - [x] Phase 1: Foundation & Data Model
 - [x] Phase 2: Dashboard UI & Node Management
 - [x] Phase 3: WebView Integration & Bridge Updates
-- [ ] Phase 4: Status Pinging & Polish
+- [x] Phase 4: Status Pinging & Polish
 
 # Build Notes Section
 ### Assumptions
@@ -44,7 +44,7 @@ The app will be a Dashboard showing a grid/list of saved Node Cards (each with I
 - [x] Phase 1: Complete
 - [x] Phase 2: Complete
 - [x] Phase 3: Complete
-- [ ] Phase 4: Not Started
+- [x] Phase 4: Complete
 
 ### Phase 1: Foundation & Data Model
 - **Status:** Complete
@@ -82,3 +82,14 @@ The app will be a Dashboard showing a grid/list of saved Node Cards (each with I
 - **Why it was done:** To allow the WebView to open dynamically with the configuration of any node clicked on the dashboard, matching the new multi-node architecture.
 - **Deviations:** Modified `resetConfig` in `NativeBridge.kt` to explicitly finish the Activity if it is an instance of `Activity`, ensuring the WebView is cleanly dismissed from the stack.
 - **Decisions made:** Reusing `MainActivity` by passing intent extras avoids creating unnecessary Fragment/Activity abstractions, and the default back button handling (`super.onBackPressed()`) naturally returns the user to the Dashboard.
+
+### Phase 4: Status Pinging & Polish
+- **Status:** Complete
+- **What was done:**
+  - Updated `item_node_card.xml` to include a circular status indicator and text.
+  - Added `kotlinx-coroutines-android` and `lifecycle-runtime-ktx` dependencies to `build.gradle` (only `coroutines` actually was missing, added it) to support `lifecycleScope`.
+  - Updated `NodeAdapter.kt` to accept node statuses from a map, updating colors and text according to online/offline state.
+  - Modified `DashboardActivity.kt` to use `lifecycleScope.launch` in `onResume()` to spawn jobs pinging node URLs every 5 seconds using `HttpURLConnection`. Canceled jobs in `onPause()`.
+- **Why it was done:** To give users immediate feedback on which nodes are actively online vs offline before clicking into them.
+- **Deviations:** Added a `tvStatusText` in addition to the indicator to make it clearer for accessibility / clarity, displaying "Checking...", "Online", or "Offline".
+- **Decisions made:** Used HTTP HEAD request rather than full GET to save bandwidth on ping checks. Kept timeout strictly to 3s to avoid long blocking periods.

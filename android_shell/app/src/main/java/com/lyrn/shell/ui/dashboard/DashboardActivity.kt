@@ -2,11 +2,12 @@ package com.lyrn.shell.ui.dashboard
 
 import android.app.AlertDialog
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.widget.EditText
 import android.widget.RadioButton
-import android.widget.RadioGroup
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -14,11 +15,20 @@ import com.lyrn.shell.AppConfig
 import com.lyrn.shell.R
 import com.lyrn.shell.model.Node
 import com.lyrn.shell.model.NodeRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.net.HttpURLConnection
+import java.net.URL
 
 class DashboardActivity : AppCompatActivity() {
 
     private lateinit var nodeRepository: NodeRepository
     private lateinit var nodeAdapter: NodeAdapter
+    private var pingJob: Job? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,6 +46,53 @@ class DashboardActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         refreshNodeList()
+        startPingingNodes()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        stopPingingNodes()
+    }
+
+    private fun startPingingNodes() {
+        pingJob?.cancel()
+        pingJob = lifecycleScope.launch {
+            while (isActive) {
+                val nodes = nodeRepository.getNodes()
+                nodes.forEach { node ->
+                    launch {
+                        val isOnline = pingNode(node.url)
+                        withContext(Dispatchers.Main) {
+                            nodeAdapter.updateNodeStatus(node.id, isOnline)
+                        }
+                    }
+                }
+                delay(5000) // Ping every 5 seconds
+            }
+        }
+    }
+
+    private fun stopPingingNodes() {
+        pingJob?.cancel()
+        pingJob = null
+    }
+
+    private suspend fun pingNode(urlString: String): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val url = URL(urlString)
+            val connection = url.openConnection() as HttpURLConnection
+            connection.requestMethod = "HEAD"
+            connection.connectTimeout = 3000 // 3 seconds
+            connection.readTimeout = 3000
+
+            val responseCode = connection.responseCode
+            connection.disconnect()
+
+            responseCode in 200..399
+        } catch (e: Exception) {
+            Log.e("DashboardActivity", "Failed to ping $urlString: ${e.message}")
+            false
+        }
     }
 
     private fun setupRecyclerView() {
