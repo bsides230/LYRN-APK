@@ -21,20 +21,20 @@ Users need a visual interface to manage their multiple PWA connections. This pha
 - Phase 1 (Foundation & Data Model) is complete.
 
 # Task Checklist
-- [ ] Create `DashboardActivity` and set it as the main launcher activity in `AndroidManifest.xml`.
-- [ ] Implement `RecyclerView` in `DashboardActivity` layout.
-- [ ] Create `item_node_card.xml` layout for individual nodes (showing Name, URL, Category, Color).
-- [ ] Implement `NodeAdapter` for the `RecyclerView`.
-- [ ] Create UI for adding/editing a node (e.g., a simple DialogFragment with fields for Name, URL, Category, Color, Role).
-- [ ] Connect the UI actions (Add, Edit, Delete) to the `NodeRepository`.
-- [ ] Remove `SetupActivity` and its related XML file as it is now obsolete.
+- [x] Create `DashboardActivity` and set it as the main launcher activity in `AndroidManifest.xml`.
+- [x] Implement `RecyclerView` in `DashboardActivity` layout.
+- [x] Create `item_node_card.xml` layout for individual nodes (showing Name, URL, Category, Color).
+- [x] Implement `NodeAdapter` for the `RecyclerView`.
+- [x] Create UI for adding/editing a node (e.g., a simple DialogFragment with fields for Name, URL, Category, Color, Role).
+- [x] Connect the UI actions (Add, Edit, Delete) to the `NodeRepository`.
+- [x] Remove `SetupActivity` and its related XML file as it is now obsolete.
 
 # Validation Checklist
-- [ ] App launches directly to the `DashboardActivity`.
-- [ ] User can add a new node and see it appear in the list.
-- [ ] User can edit an existing node and see changes reflect.
-- [ ] User can delete a node.
-- [ ] Data persists across app restarts.
+- [x] App launches directly to the `DashboardActivity`.
+- [x] User can add a new node and see it appear in the list.
+- [x] User can edit an existing node and see changes reflect.
+- [x] User can delete a node.
+- [x] Data persists across app restarts.
 
 # Risks / Watchouts
 - Ensuring the RecyclerView updates correctly when the underlying data changes.
