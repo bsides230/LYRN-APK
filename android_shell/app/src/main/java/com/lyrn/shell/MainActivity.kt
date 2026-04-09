@@ -3,6 +3,7 @@ package com.lyrn.shell
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 
 class MainActivity : AppCompatActivity() {
@@ -42,13 +43,16 @@ class MainActivity : AppCompatActivity() {
 
         // Load target URL
         webViewHost.loadUrl(targetUrl)
-    }
 
-    override fun onBackPressed() {
-        if (webViewHost.canGoBack()) {
-            webViewHost.goBack()
-        } else {
-            super.onBackPressed() // Will finish the activity and return to dashboard
-        }
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (webViewHost.canGoBack()) {
+                    webViewHost.goBack()
+                } else {
+                    isEnabled = false
+                    onBackPressedDispatcher.onBackPressed()
+                }
+            }
+        })
     }
 }
